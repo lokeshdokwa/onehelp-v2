@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeftIcon } from '../../components/ui/Icons';
-import { OfflineAIService, AIResponseMessage } from '../../services/OfflineAIService';
+import { OfflineAIService, AIResponseMessage, LLMStatus } from '../../services/OfflineAIService';
 
 interface AIAssistantScreenProps {
   onBack: () => void;
@@ -25,6 +25,7 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({ onBack }) 
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<AIResponseMessage[]>([]);
+  const [llmStatus, setLlmStatus] = useState<LLMStatus>('unloaded');
 
   const sampleChips = [
     'Snake bite first-aid',
@@ -42,9 +43,19 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({ onBack }) 
         id: 'welcome_1',
         sender: 'ai',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        text: `Namaste! Main OneHelp ka Offline Emergency Assistant hoon.\n\nMain aapke phone ke processor par 100% offline chalta hoon (bina kisi internet ke). Kisi bhi medical emergency, first-aid, disaster ya personal safety ke baare me aap mujhse seedha pooch sakte hain.`,
+        text: `Namaste! Main OneHelp ka On-Device AI Assistant hoon.\n\nMain aapke phone ke processor par 100% offline (Hugging Face SmolLM2 engine) par chalta hoon (bina kisi internet ke). Kisi bhi medical emergency, first-aid, disaster ya personal safety ke baare me aap mujhse seedha pooch sakte hain.`,
       },
     ]);
+
+    // Listen to Hugging Face LLM status
+    const unsub = OfflineAIService.addStatusListener((status) => {
+      setLlmStatus(status);
+    });
+
+    // Initialize Hugging Face model in background
+    OfflineAIService.initModel();
+
+    return unsub;
   }, []);
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -67,16 +78,59 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({ onBack }) 
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 80);
 
-    // Natural on-device AI response
-    setTimeout(async () => {
-      const aiReply = await OfflineAIService.processQuery(text);
-      setMessages((prev) => [...prev, aiReply]);
-      setIsTyping(false);
+    const replyMsgId = (Date.now() + 1).toString();
+    let hasStreamedToken = false;
 
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-    }, 300);
+    try {
+      const aiReply = await OfflineAIService.processQuery(text, (token) => {
+        if (!hasStreamedToken) {
+          hasStreamedToken = true;
+          setIsTyping(false);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: replyMsgId,
+              sender: 'ai',
+              text: token,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              isStreaming: true,
+            },
+          ]);
+        } else {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === replyMsgId ? { ...m, text: m.text + token } : m))
+          );
+        }
+        scrollViewRef.current?.scrollToEnd({ animated: false });
+      });
+
+      if (!hasStreamedToken) {
+        setIsTyping(false);
+        setMessages((prev) => [...prev, aiReply]);
+      } else {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === replyMsgId ? { ...m, text: aiReply.text, isStreaming: false } : m))
+        );
+      }
+    } catch {
+      setIsTyping(false);
+    }
+
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
+  const getStatusSubtitle = () => {
+    switch (llmStatus) {
+      case 'ready':
+        return 'SmolLM2 (Hugging Face) • On-Device';
+      case 'loading':
+        return 'Loading SmolLM2 (Hugging Face)...';
+      case 'error':
+      default:
+        return 'On-Device AI • 100% Offline';
+    }
   };
 
   return (
@@ -94,8 +148,15 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({ onBack }) 
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>OneHelp Assistant</Text>
           <View style={styles.headerSubRow}>
-            <View style={styles.statusDot} />
-            <Text style={styles.headerSub}>Offline • On-Device</Text>
+            <View
+              style={[
+                styles.statusDot,
+                llmStatus === 'loading'
+                  ? styles.statusDotLoading
+                  : styles.statusDotReady,
+              ]}
+            />
+            <Text style={styles.headerSub}>{getStatusSubtitle()}</Text>
           </View>
         </View>
       </View>
@@ -166,24 +227,26 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({ onBack }) 
         </ScrollView>
       </View>
 
-      {/* Clean Normal Input Bar */}
+      {/* Clean Bottom Input Bar */}
       <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Ask in Hindi or English (Offline)..."
-          placeholderTextColor="#94A3B8"
-          value={inputVal}
-          onChangeText={setInputVal}
-          onSubmitEditing={() => handleSendMessage()}
-          returnKeyType="send"
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Ask in Hindi or English (Offline)..."
+            placeholderTextColor="#94A3B8"
+            value={inputVal}
+            onChangeText={setInputVal}
+            onSubmitEditing={() => handleSendMessage()}
+            returnKeyType="send"
+          />
+        </View>
         <TouchableOpacity
           style={[styles.sendBtn, !inputVal.trim() && styles.sendBtnDisabled]}
           onPress={() => handleSendMessage()}
           disabled={!inputVal.trim()}
           activeOpacity={0.8}
         >
-          <Text style={styles.sendBtnText}>➤</Text>
+          <Text style={styles.sendIcon}>➤</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -226,7 +289,12 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
+  },
+  statusDotReady: {
     backgroundColor: '#16A34A',
+  },
+  statusDotLoading: {
+    backgroundColor: '#EAB308',
   },
   headerSub: {
     fontSize: 12,
@@ -278,19 +346,19 @@ const styles = StyleSheet.create({
   },
   userMsgText: {
     color: '#FFFFFF',
-    fontWeight: '500',
+    fontWeight: '400',
   },
   aiMsgText: {
     color: '#1E293B',
     fontWeight: '400',
   },
   timestamp: {
-    fontSize: 10,
+    fontSize: 10.5,
     marginTop: 6,
     alignSelf: 'flex-end',
   },
   userTimestamp: {
-    color: '#BFDBFE',
+    color: 'rgba(255, 255, 255, 0.75)',
   },
   aiTimestamp: {
     color: '#94A3B8',
@@ -305,63 +373,65 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   chipsRow: {
-    backgroundColor: '#FFFFFF',
+    paddingVertical: 8,
+    backgroundColor: '#F8FAFC',
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',
-    paddingVertical: 8,
   },
   chipsScroll: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     gap: 8,
   },
   chip: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   chipText: {
-    fontSize: 12,
+    fontSize: 12.5,
     color: '#334155',
     fontWeight: '500',
   },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingTop: 10,
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
-    gap: 8,
+    gap: 10,
   },
-  textInput: {
+  inputContainer: {
     flex: 1,
-    height: 42,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 21,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 24,
     paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 4,
+  },
+  input: {
     fontSize: 14,
     color: '#0F172A',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    minHeight: 38,
   },
   sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: '#2563EB',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   sendBtnDisabled: {
     backgroundColor: '#94A3B8',
+    opacity: 0.5,
   },
-  sendBtnText: {
+  sendIcon: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: 'bold',
   },
 });
