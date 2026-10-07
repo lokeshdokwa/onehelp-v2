@@ -22,3 +22,4 @@ ios/Pods/
 /screen_*.png
 /current_phone_*.png
 tsconfig.tsbuildinfo
+*.apk
