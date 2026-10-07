@@ -23,8 +23,15 @@ export const LocationService = {
         locationProvider: 'auto'
       });
 
+      let lastUpdate = 0;
       watchId = Geolocation.watchPosition(
         (location) => {
+          const now = Date.now();
+          if (now - lastUpdate < 8000) {
+            return;
+          }
+          lastUpdate = now;
+
           const locData: LocationData = {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -37,10 +44,9 @@ export const LocationService = {
           useLocationStore.getState().setLocation(locData);
         },
         (error) => {
-          console.error('[LocationService] Location error:', error);
           useLocationStore.getState().setGPSStatus('low_accuracy');
         },
-        { enableHighAccuracy: true, distanceFilter: 10, maximumAge: 10000 }
+        { enableHighAccuracy: false, distanceFilter: 30, maximumAge: 15000 }
       );
       
       useLocationStore.getState().setTracking(true);

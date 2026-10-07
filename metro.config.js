@@ -15,11 +15,18 @@ const config = {
       'bin',
     ],
     sourceExts: [...defaultConfig.resolver.sourceExts, 'svg'],
-    extraNodeModules: {
-      'react-native/asset-registry': require.resolve('@react-native/assets-registry/registry'),
+    resolveRequest: (context, moduleName, platform) => {
+      if (moduleName === 'react-native/asset-registry') {
+        return {
+          filePath: require.resolve('@react-native/assets-registry/registry'),
+          type: 'sourceFile',
+        };
+      }
+      return context.resolveRequest(context, moduleName, platform);
     },
   },
   transformer: {
+    assetRegistryPath: 'react-native/Libraries/Image/AssetRegistry',
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,

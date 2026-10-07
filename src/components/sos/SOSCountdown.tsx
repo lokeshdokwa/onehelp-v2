@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { TypographyText } from '../ui/Typography';
 
 export const SOSCountdown: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [count, setCount] = useState(3);
-  const scale = new Animated.Value(1);
+  const scale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (count > 0) {

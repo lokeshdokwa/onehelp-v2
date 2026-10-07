@@ -51,7 +51,7 @@ export const PermissionsScreen: React.FC<Props> = ({ navigation }) => {
       );
       
       // Step 7: Bluetooth (only request on Android 12+)
-      if (Platform.Version >= 31) {
+      if (typeof Platform.Version === 'number' && Platform.Version >= 31) {
         await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN
         );

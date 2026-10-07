@@ -1,77 +1,89 @@
 /**
  * OneHelp Design System — Typography Scale
- *
- * Primary typeface: DM Sans — geometric humanist sans-serif
- * Secondary: Space Grotesk — for numbers, data, status readouts
- *
- * No other font families are used.
+ * Safe cross-platform typography definitions with fallback.
  */
 
-import { TextStyle } from 'react-native';
+import { Platform } from 'react-native';
 
 export interface TypographyStyle {
   fontFamily: string;
   fontSize: number;
   lineHeight: number;
   letterSpacing: number;
+  fontWeight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
 }
 
+const defaultFont = Platform.select({
+  ios: 'System',
+  android: 'sans-serif',
+  default: 'sans-serif',
+});
+
+const boldFont = Platform.select({
+  ios: 'System',
+  android: 'sans-serif-medium',
+  default: 'sans-serif',
+});
+
 export const Typography: Record<string, TypographyStyle> = {
-  /** Display — SOS button and major headings only */
+  /** Display — major titles and SOS */
   display: {
-    fontFamily: 'DMSans-Bold',
-    fontSize: 36,
-    lineHeight: 42,
+    fontFamily: boldFont,
+    fontSize: 32,
+    lineHeight: 38,
     letterSpacing: -0.5,
+    fontWeight: '800',
   },
   /** Headline — screen titles */
   headline: {
-    fontFamily: 'DMSans-SemiBold',
+    fontFamily: boldFont,
     fontSize: 22,
     lineHeight: 28,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
+    fontWeight: '700',
   },
-  /** Title — section headers, card titles */
+  /** Title — card headers & section titles */
   title: {
-    fontFamily: 'DMSans-Medium',
+    fontFamily: boldFont,
     fontSize: 17,
     lineHeight: 24,
-    letterSpacing: 0,
+    letterSpacing: -0.2,
+    fontWeight: '600',
   },
   /** Body — standard readable text */
   body: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: defaultFont,
     fontSize: 15,
     lineHeight: 22,
-    letterSpacing: 0.1,
+    letterSpacing: 0,
+    fontWeight: '400',
   },
   /** Caption — labels, meta info, timestamps */
   caption: {
-    fontFamily: 'DMSans-Regular',
+    fontFamily: defaultFont,
     fontSize: 13,
     lineHeight: 18,
-    letterSpacing: 0.2,
+    letterSpacing: 0.1,
+    fontWeight: '400',
   },
-  /** Data — numbers, coordinates, stress scores */
+  /** Data — numbers, coordinates, timers */
   data: {
-    fontFamily: 'SpaceGrotesk-Medium',
+    fontFamily: defaultFont,
     fontSize: 14,
     lineHeight: 20,
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
+    fontWeight: '600',
   },
-  /** Mono — status codes, technical identifiers */
+  /** Mono — status codes */
   mono: {
-    fontFamily: 'SpaceGrotesk-Regular',
+    fontFamily: Platform.select({ ios: 'Courier', default: 'monospace' }),
     fontSize: 12,
     lineHeight: 16,
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
+    fontWeight: '500',
   },
 } as const;
 
-/**
- * Applies a font scale multiplier to all typography styles.
- * Used by child theme (1.2x) and senior theme (1.5x).
- */
 export function scaleTypography(
   scale: number,
   minFontSize: number = 0,

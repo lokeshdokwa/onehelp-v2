@@ -1,8 +1,5 @@
 /**
- * OneHelp — Default Adult Theme (14–59 years)
- *
- * Standard design system values. Dense information layout.
- * Full access to all features.
+ * OneHelp — Default Theme
  */
 
 import { Colors } from './colors';
@@ -20,37 +17,19 @@ export interface OneHelpTheme {
   minTouchTarget: number;
   sosButtonSize: number;
   fontScale: number;
-  animationSpeed: number;
-  labels: {
-    sosButton: string;
-    sosHint: string;
-    safeStatus: string;
-    fakeCall: string;
-    siren: string;
-    morseFlash: string;
-    signLanguage: string;
-  };
+  animationSpeed?: number;
+  labels?: Record<string, string>;
 }
 
 export const defaultTheme: OneHelpTheme = {
   mode: 'adult',
-  colors: Colors,
+  colors: Colors as Record<string, string>,
   typography: Typography,
   spacing: Spacing,
   radius: Radius,
-  buttonHeight: 52,
-  tabIconSize: 24,
+  buttonHeight: 48,
+  tabIconSize: 22,
   minTouchTarget: 44,
   sosButtonSize: 180,
   fontScale: 1.0,
-  animationSpeed: 1.0,
-  labels: {
-    sosButton: 'Hold SOS',
-    sosHint: 'Hold 3 seconds to send alert',
-    safeStatus: 'Status: Nominal',
-    fakeCall: 'Fake Call',
-    siren: 'Siren',
-    morseFlash: 'Morse SOS',
-    signLanguage: 'Sign Lang.',
-  },
 };

@@ -37,7 +37,7 @@ export const PanicButton = () => {
       easing: Easing.linear,
     });
     timerRef.current = setTimeout(() => {
-      runOnJS(fireSOS)();
+      fireSOS();
     }, HOLD_DURATION);
   }, []);
 
@@ -50,10 +50,6 @@ export const PanicButton = () => {
     }
   }, []);
 
-  // Arc ring animation — strokeDashoffset goes from CIRCUMFERENCE (empty) to 0 (full)
-  const ringStyle = useAnimatedStyle(() => ({
-    strokeDashoffset: CIRCUMFERENCE * (1 - progress.value),
-  }));
 
   // Outer glow that expands as you hold
   const glowStyle = useAnimatedStyle(() => ({

@@ -17,7 +17,7 @@ export const LostChildScannerModal: React.FC<{ visible: boolean; onClose: () => 
   };
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modal}>
           <TypographyText variant="title">Lost Child Scanner</TypographyText>

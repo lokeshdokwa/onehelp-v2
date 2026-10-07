@@ -17,3 +17,8 @@ android/app/build/
 ios/build/
 ios/Pods/
 .env
+
+# Debug and temporary screencaps
+/screen_*.png
+/current_phone_*.png
+tsconfig.tsbuildinfo

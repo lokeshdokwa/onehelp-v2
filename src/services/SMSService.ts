@@ -9,6 +9,7 @@
 import { NativeModules, Platform } from 'react-native';
 import { useUserStore } from '../store/useUserStore';
 import { useLocationStore } from '../store/useLocationStore';
+import { useDeviceStatusStore } from '../store/useDeviceStatusStore';
 
 const { SmsManagerModule } = NativeModules;
 
@@ -21,6 +22,8 @@ export const SMSService = {
   broadcastSOS: async (incidentId: string): Promise<boolean> => {
     try {
       const { emergencyContacts, userName } = useUserStore.getState();
+      const { address } = useLocationStore.getState();
+      const { batteryLevel } = useDeviceStatusStore.getState();
       const locationUrl = useLocationStore.getState().getGoogleMapsUrl();
       const dms = useLocationStore.getState().getDMSString();
       const timestamp = new Date().toLocaleTimeString('en-IN');
@@ -30,7 +33,8 @@ export const SMSService = {
         return false;
       }
 
-      const message = `🆘 EMERGENCY ALERT from ${userName}! I need help immediately.\n\n📍 Live Location: ${locationUrl}\n🧭 Coordinates: ${dms}\n⏰ Time: ${timestamp}\n\nSent automatically via OneHelp App.`;
+      const addressLine = address ? `📍 Area: ${address}\n` : '';
+      const message = `🆘 EMERGENCY ALERT from ${userName}! I need help immediately.\n\n${addressLine}📍 Live Location: ${locationUrl}\n🧭 Coordinates: ${dms}\n🔋 Battery: ${batteryLevel}%\n⏰ Time: ${timestamp}\n\nSent automatically via OneHelp App.`;
 
       if (Platform.OS === 'android') {
         if (!SmsManagerModule) {

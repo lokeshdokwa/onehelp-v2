@@ -13,7 +13,7 @@ export const FeedbackModal: React.FC<{ visible: boolean; onClose: () => void }> 
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modal}>
           <TypographyText variant="title">Rate Emergency Response</TypographyText>

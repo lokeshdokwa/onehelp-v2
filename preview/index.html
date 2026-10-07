@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneHelp — Mobile App Interactive Showcase (All 26 Screens)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563EB;
+      --primary-dark: #1D4ED8;
+      --primary-light: #EFF6FF;
+      --emergency: #DC2626;
+      --emergency-glow: rgba(220, 38, 38, 0.25);
+      --safe: #16A34A;
+      --safe-light: #F0FDF4;
+      --warning: #D97706;
+      --bg-dark: #0F172A;
+      --card-dark: #1E293B;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      --border: #E2E8F0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: #0B0F19;
+      color: #F8FAFC;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Toolbar */
+    header {
+      background: #111827;
+      border-bottom: 1px solid #1F2937;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-shield {
+      width: 32px;
+      height: 32px;
+      background: #DC2626;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFF;
+      font-weight: 900;
+      font-size: 18px;
+      box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-tag {
+      background: #1E293B;
+      color: #38BDF8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .view-btn {
+      background: #1F2937;
+      color: #CBD5E1;
+      border: 1px solid #374151;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-btn:hover, .view-btn.active {
+      background: #2563EB;
+      color: #FFF;
+      border-color: #2563EB;
+    }
+
+    /* Main Container with Sidebar + Device Canvas */
+    .app-workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar Screens Directory */
+    .screens-sidebar {
+      width: 320px;
+      background: #0F172A;
+      border-right: 1px solid #1E293B;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .category-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #64748B;
+      margin: 14px 6px 6px;
+    }
+
+    .nav-screen-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: transparent;
+      color: #94A3B8;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .nav-screen-btn:hover {
+      background: #1E293B;
+      color: #F8FAFC;
+    }
+
+    .nav-screen-btn.active {
+      background: #1E293B;
+      color: #38BDF8;
+      border-color: #38BDF8;
+      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15);
+    }
+
+    .nav-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: #1E293B;
+      color: #94A3B8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .nav-screen-btn.active .nav-num {
+      background: #38BDF8;
+      color: #0F172A;
+    }
+
+    /* Device Canvas Container */
+    .device-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at center, #172033 0%, #0B0F19 100%);
+      overflow-y: auto;
+    }
+
+    /* iPhone 15 Pro Frame Mockup */
+    .iphone-frame {
+      width: 380px;
+      height: 760px;
+      background: #000;
+      border-radius: 52px;
+      border: 10px solid #2D3748;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8),
+                  0 0 0 1px #4A5568,
+                  inset 0 0 0 3px #1A202C;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 106px;
+      height: 28px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+    }
+
+    .island-cam {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #111;
+      border: 1px solid #222;
+    }
+
+    .island-sensor {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #050515;
+    }
+
+    /* Screen Inside Mobile */
+    .mobile-screen {
+      flex: 1;
+      background: #FFFFFF;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: none;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .mobile-screen.active {
+      display: flex;
+    }
+
+    /* Status Bar in Phone */
+    .phone-status-bar {
+      height: 44px;
+      padding: 10px 22px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0F172A;
+      z-index: 40;
+    }
+
+    .phone-status-bar.dark-status {
+      color: #FFF;
+    }
+
+    /* Bottom Tab Bar in Phone */
+    .mobile-bottom-tabs {
+      height: 64px;
+      background: #FFFFFF;
+      border-top: 1px solid #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding-bottom: 8px;
+      z-index: 30;
+      position: sticky;
+      bottom: 0;
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #94A3B8;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .tab-item.active {
+      color: #2563EB;
+    }
+
+    .tab-icon {
+      font-size: 18px;
+    }
+
+    /* Screen 1: Splash Screen */
+    .screen-splash {
+      background: #0F172A;
+      color: #FFF;
+      align-items: center;
+      justify-content: space-between;
+      padding: 70px 24px 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .splash-mountains {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at bottom, #1E293B 0%, #090D16 100%);
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .splash-content {
+      z-index: 10;
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .splash-shield-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      box-shadow: 0 0 30px rgba(220, 38, 38, 0.4);
+    }
+
+    .splash-shield-icon {
+      font-size: 48px;
+    }
+
+    .splash-title {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .splash-sub {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 6px;
+    }
+
+    .splash-pill {
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* Screen 2-4: Onboarding */
+    .onboarding-screen {
+      padding: 20px 24px 32px;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+    }
+
+    .onboard-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .onboard-heading {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0F172A;
+      line-height: 32px;
+      letter-spacing: -0.4px;
+    }
+
+    .onboard-sub {
+      font-size: 14px;
+      color: #64748B;
+      line-height: 20px;
+      margin-top: 8px;
+    }
+
+    .onboard-graphic {
+      margin: auto 0;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .onboard-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+
+    .dot {
+      height: 7px;
+      border-radius: 4px;
+    }
+
+    .dot.active {
+      width: 22px;
+      background: #2563EB;
+    }
+
+    .dot.inactive {
+      width: 7px;
+      background: #CBD5E1;
+    }
+
+    .btn-primary {
+      width: 100%;
+      height: 48px;
+      background: #2563EB;
+      color: #FFF;
+      border-radius: 12px;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #64748B;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+
+    /* Screen 5: Login */
+    .login-container {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-box {
+      background: #F8FAFC;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 12px;
+      height: 48px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .input-box input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      color: #0F172A;
+      flex: 1;
+    }
+
+    /* Screen 6: Dashboard */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px 8px;
+    }
+
+    .dash-brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0F172A;
+    }
+
+    .location-strip {
+      margin: 8px 18px 12px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sos-hero-area {
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .sos-glow-outer {
+      position: absolute;
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      background: rgba(220, 38, 38, 0.08);
+      animation: pulseGlow 2.5s infinite;
+    }
+
+    .sos-glow-mid {
+      position: absolute;
+      width: 175px;
+      height: 175px;
+      border-radius: 50%;
+      background: rgba(220, 38, 38, 0.15);
+    }
+
+    .sos-big-btn {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+      color: #FFF;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.45);
+      cursor: pointer;
+      transition: transform 0.1s;
+      z-index: 10;
+    }
+
+    .sos-big-btn:active {
+      transform: scale(0.95);
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.08); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+
+    .services-grid {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 18px;
+      margin-top: 14px;
+    }
+
+    .service-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .service-icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      border: 1.5px solid;
+    }
+
+    /* Screen 7: Emergency Active */
+    .emerg-banner {
+      background: #DC2626;
+      color: #FFF;
+      padding: 16px 20px 24px;
+      border-bottom-left-radius: 24px;
+      border-bottom-right-radius: 24px;
+      text-align: center;
+    }
+
+    .timer-ring-box {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.18);
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      margin: 12px auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* General Card */
+    .white-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 14px;
+      margin: 10px 18px;
+    }
+
+    /* ================= MOBILE VIEWPORT ADAPTATION ================= */
+    @media (max-width: 768px) {
+      body {
+        overflow: hidden;
+        height: 100vh;
+        height: 100dvh;
+      }
+      header {
+        display: none !important;
+      }
+      .app-workspace {
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        width: 100vw;
+        overflow: hidden;
+      }
+      .screens-sidebar {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        max-height: 80vh;
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -12px 40px rgba(0,0,0,0.85);
+        z-index: 99999;
+        border-top: 2px solid #334155;
+        background: #0F172A;
+        padding: 20px 16px 44px;
+      }
+      .screens-sidebar.mobile-open {
+        display: flex !important;
+      }
+      .device-viewport {
+        padding: 0 !important;
+        background: #FFFFFF !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        align-items: stretch !important;
+        justify-content: stretch !important;
+      }
+      .iphone-frame {
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      .dynamic-island {
+        display: none !important;
+      }
+      .mobile-screen {
+        padding-bottom: 70px !important;
+      }
+      .mobile-floating-pill {
+        display: flex !important;
+      }
+      .sidebar-backdrop {
+        display: none;
+      }
+      .sidebar-backdrop.active {
+        display: block !important;
+      }
+    }
+
+    /* Floating Switcher Pill on Mobile */
+    .mobile-floating-pill {
+      display: none;
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9000;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(56, 189, 248, 0.4);
+      border-radius: 30px;
+      padding: 10px 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      color: #FFF;
+      font-size: 13px;
+      font-weight: 700;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .mobile-floating-pill:active {
+      transform: translateX(-50%) scale(0.96);
+    }
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      z-index: 99998;
+    }
+    .mobile-sheet-close {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .mobile-sheet-close {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #1E293B;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Backdrop for Mobile Sheet -->
+  <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+  <!-- Floating Mobile Screen Switcher Pill -->
+  <div id="mobileFloatingPill" class="mobile-floating-pill" onclick="toggleMobileSidebar()">
+    <span>📱</span>
+    <span id="mobilePillLabel">6. Home / Dashboard</span>
+    <span style="color:#38BDF8; font-size:11px; margin-left:4px;">▼</span>
+  </div>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand-wrap">
+      <div class="brand-shield">+</div>
+      <div class="brand-title">OneHelp</div>
+      <div class="brand-tag">Figma System Preview (All 26 Screens)</div>
+    </div>
+    <div class="top-actions">
+      <button class="view-btn active" onclick="switchScreen('dashboard')">🏠 Dashboard</button>
+      <button class="view-btn" onclick="switchScreen('emergency')">🚨 Active SOS</button>
+      <button class="view-btn" onclick="switchScreen('hazard')">🗺️ Hazard Map</button>
+      <button class="view-btn" onclick="switchScreen('stress')">📊 AI Voice Stress</button>
+      <button class="view-btn" onclick="switchScreen('family')">👥 Family Contacts</button>
+      <button class="view-btn" onclick="switchScreen('settings')">⚙️ Settings</button>
+    </div>
+  </header>
+
+  <div class="app-workspace">
+    <!-- Left Sidebar: All 26 Screens Index -->
+    <aside id="screensSidebar" class="screens-sidebar">
+      <div class="mobile-sheet-close">
+        <span style="font-size:14px; font-weight:800; color:#F8FAFC;">📱 Select Screen (1 - 26)</span>
+        <button onclick="toggleMobileSidebar()" style="background:#1E293B; border:1px solid #334155; color:#CBD5E1; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:700; cursor:pointer;">Close ✕</button>
+      </div>
+      <div class="category-title">Onboarding & Auth</div>
+      <button class="nav-screen-btn" onclick="switchScreen('splash')"><span class="nav-num">1</span> Splash Screen</button>
+      <button class="nav-screen-btn" onclick="switchScreen('onboard1')"><span class="nav-num">2</span> Onboarding 1 (Safety)</button>
+      <button class="nav-screen-btn" onclick="switchScreen('onboard2')"><span class="nav-num">3</span> Onboarding 2 (Offline)</button>
+      <button class="nav-screen-btn" onclick="switchScreen('onboard3')"><span class="nav-num">4</span> Onboarding 3 (Trusted)</button>
+      <button class="nav-screen-btn" onclick="switchScreen('login')"><span class="nav-num">5</span> Login / Sign Up</button>
+
+      <div class="category-title">Core Emergency & Dashboard</div>
+      <button class="nav-screen-btn active" onclick="switchScreen('dashboard')"><span class="nav-num">6</span> Home / Dashboard</button>
+      <button class="nav-screen-btn" onclick="switchScreen('emergency')"><span class="nav-num">7</span> Emergency Active</button>
+      <button class="nav-screen-btn" onclick="switchScreen('hazard')"><span class="nav-num">9</span> Live Hazard Map</button>
+      <button class="nav-screen-btn" onclick="switchScreen('routing')"><span class="nav-num">17</span> Multi-Agency Routing</button>
+      <button class="nav-screen-btn" onclick="switchScreen('panicModal')"><span class="nav-num">20</span> Panic Button Flow</button>
+      <button class="nav-screen-btn" onclick="switchScreen('afterAlert')"><span class="nav-num">24</span> After Alert (Help on way)</button>
+
+      <div class="category-title">Safety Network & Contacts</div>
+      <button class="nav-screen-btn" onclick="switchScreen('family')"><span class="nav-num">12</span> Family Contacts</button>
+      <button class="nav-screen-btn" onclick="switchScreen('familyAlert')"><span class="nav-num">16</span> Trusted Family Alert</button>
+      <button class="nav-screen-btn" onclick="switchScreen('helpline')"><span class="nav-num">19</span> Helpline Directory (Offline)</button>
+
+      <div class="category-title">AI & Smart Sensors</div>
+      <button class="nav-screen-btn" onclick="switchScreen('stress')"><span class="nav-num">10</span> AI Voice Stress Analyzer</button>
+      <button class="nav-screen-btn" onclick="switchScreen('voiceModal')"><span class="nav-num">23</span> Voice Command ("Help")</button>
+      <button class="nav-screen-btn" onclick="switchScreen('shakeSettings')"><span class="nav-num">15</span> Shake & Power Trigger</button>
+      <button class="nav-screen-btn" onclick="switchScreen('shakeModal')"><span class="nav-num">21</span> Shake Trigger Flow</button>
+
+      <div class="category-title">Security, Profile & Offline</div>
+      <button class="nav-screen-btn" onclick="switchScreen('settings')"><span class="nav-num">11</span> Settings</button>
+      <button class="nav-screen-btn" onclick="switchScreen('dossier')"><span class="nav-num">13</span> Medical Dossier</button>
+      <button class="nav-screen-btn" onclick="switchScreen('offline')"><span class="nav-num">14</span> Offline Mode Status</button>
+      <button class="nav-screen-btn" onclick="switchScreen('duress')"><span class="nav-num">22</span> Duress PIN</button>
+
+      <div class="category-title">Widgets & System</div>
+      <button class="nav-screen-btn" onclick="switchScreen('widget')"><span class="nav-num">18</span> Quick Access Widget</button>
+      <button class="nav-screen-btn" onclick="switchScreen('pushNotif')"><span class="nav-num">25</span> Push Notification Mockup</button>
+      <button class="nav-screen-btn" onclick="switchScreen('appIcon')"><span class="nav-num">26</span> App Icon & Logo Guide</button>
+    </aside>
+
+    <!-- Center Phone Display Viewport -->
+    <main class="device-viewport">
+      <div class="iphone-frame">
+        <!-- Dynamic Island -->
+        <div class="dynamic-island">
+          <div class="island-cam"></div>
+          <div class="island-sensor"></div>
+        </div>
+
+        <!-- ================= SCREEN 1: SPLASH ================= -->
+        <div id="screen-splash" class="mobile-screen screen-splash">
+          <div class="phone-status-bar dark-status"><span>9:41</span><span>5G 100%</span></div>
+          <div class="splash-mountains"></div>
+          <div class="splash-content">
+            <div class="splash-shield-circle">
+              <span class="splash-shield-icon">🛡️</span>
+            </div>
+            <h1 class="splash-title">OneHelp</h1>
+            <p class="splash-sub">Real Help in Emergency</p>
+          </div>
+          <div class="splash-pill">Works Offline and Weaker Connection</div>
+        </div>
+
+        <!-- ================= SCREEN 2: ONBOARDING 1 ================= -->
+        <div id="screen-onboard1" class="mobile-screen onboarding-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div class="onboard-top">
+            <span style="color:#DC2626; font-size: 20px;">🛡️</span>
+            <strong style="color:#0F172A; font-size: 16px;">OneHelp</strong>
+          </div>
+          <div>
+            <h2 class="onboard-heading">Your Safety<br>Our Priority</h2>
+            <p class="onboard-sub">Fast, reliable and offline emergency support when you need it most.</p>
+          </div>
+          <div class="onboard-graphic">
+            <div style="width: 140px; height: 140px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 64px;">
+              📱🛡️
+            </div>
+          </div>
+          <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="onboard-dots">
+              <div class="dot active"></div>
+              <div class="dot inactive"></div>
+              <div class="dot inactive"></div>
+            </div>
+            <button class="btn-primary" onclick="switchScreen('onboard2')">Get Started</button>
+            <button class="btn-secondary" onclick="switchScreen('login')">I already have an account</button>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 3: ONBOARDING 2 ================= -->
+        <div id="screen-onboard2" class="mobile-screen onboarding-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div class="onboard-top">
+            <span style="color:#DC2626; font-size: 20px;">🛡️</span>
+            <strong style="color:#0F172A; font-size: 16px;">OneHelp</strong>
+          </div>
+          <div>
+            <h2 class="onboard-heading">Works Offline and<br>Weaker Connection</h2>
+            <p class="onboard-sub">No internet, no SIM, no cell towers. Still works when it matters.</p>
+          </div>
+          <div class="onboard-graphic">
+            <div style="width: 140px; height: 140px; border-radius: 50%; background: #EFF6FF; border: 2px dashed #93C5FD; display: flex; align-items: center; justify-content: center; font-size: 54px;">
+              📡❌
+            </div>
+          </div>
+          <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="onboard-dots">
+              <div class="dot inactive"></div>
+              <div class="dot active"></div>
+              <div class="dot inactive"></div>
+            </div>
+            <button class="btn-primary" onclick="switchScreen('onboard3')">Next</button>
+            <button class="btn-secondary" onclick="switchScreen('login')">Skip</button>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 4: ONBOARDING 3 ================= -->
+        <div id="screen-onboard3" class="mobile-screen onboarding-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div class="onboard-top">
+            <span style="color:#DC2626; font-size: 20px;">🛡️</span>
+            <strong style="color:#0F172A; font-size: 16px;">OneHelp</strong>
+          </div>
+          <div>
+            <h2 class="onboard-heading">Trusted by<br>Millions</h2>
+            <p class="onboard-sub">From your family to emergency services, OneHelp keeps you safe.</p>
+          </div>
+          <div class="onboard-graphic">
+            <div style="display: flex; gap: 14px;">
+              <div style="text-align: center;"><div style="width: 48px; height: 48px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 20px;">👥</div><div style="font-size: 10px; font-weight: 700; color: #475569; margin-top: 4px;">Family</div></div>
+              <div style="text-align: center;"><div style="width: 48px; height: 48px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 20px;">👮</div><div style="font-size: 10px; font-weight: 700; color: #475569; margin-top: 4px;">Police</div></div>
+              <div style="text-align: center;"><div style="width: 48px; height: 48px; border-radius: 50%; background: #FEF2F2; display: flex; align-items: center; justify-content: center; font-size: 20px;">🔥</div><div style="font-size: 10px; font-weight: 700; color: #475569; margin-top: 4px;">Fire</div></div>
+              <div style="text-align: center;"><div style="width: 48px; height: 48px; border-radius: 50%; background: #FFF1F2; display: flex; align-items: center; justify-content: center; font-size: 20px;">🚑</div><div style="font-size: 10px; font-weight: 700; color: #475569; margin-top: 4px;">Ambulance</div></div>
+            </div>
+          </div>
+          <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="onboard-dots">
+              <div class="dot inactive"></div>
+              <div class="dot inactive"></div>
+              <div class="dot active"></div>
+            </div>
+            <button class="btn-primary" onclick="switchScreen('login')">Get Started</button>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 5: LOGIN ================= -->
+        <div id="screen-login" class="mobile-screen login-container">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="text-align: center; margin: 12px 0 24px;">
+            <span style="color:#DC2626; font-size: 26px;">🛡️</span>
+            <div style="font-size: 24px; font-weight: 900; color: #0F172A; margin-top: 8px;">Welcome Back</div>
+            <div style="font-size: 13px; color: #64748B;">Login to continue</div>
+          </div>
+
+          <div class="input-box">
+            <span>📱</span>
+            <input type="text" value="+91 98765 43210" placeholder="Mobile Number">
+          </div>
+          <div class="input-box">
+            <span>🔒</span>
+            <input type="password" value="••••••••" placeholder="Password">
+            <span style="font-size: 12px; font-weight: 700; color: #2563EB; cursor: pointer;">Show</span>
+          </div>
+
+          <button class="btn-primary" onclick="switchScreen('dashboard')">Login</button>
+          <div style="text-align: center; margin: 12px 0; font-size: 12px; color: #2563EB; font-weight: 600; cursor: pointer;">Forgot Password?</div>
+
+          <div style="display: flex; align-items: center; margin: 14px 0;">
+            <div style="flex:1; height: 1px; background: #E2E8F0;"></div>
+            <div style="margin: 0 12px; font-size: 11px; font-weight: 700; color: #94A3B8;">OR</div>
+            <div style="flex:1; height: 1px; background: #E2E8F0;"></div>
+          </div>
+
+          <button style="height: 48px; border-radius: 12px; border: 1.5px solid #E2E8F0; background: #FFF; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 14px; color: #1E293B; cursor: pointer;" onclick="switchScreen('dashboard')">
+            <span>🌐</span> Continue with Google
+          </button>
+          <div style="text-align: center; margin-top: 18px; font-size: 13px; color: #64748B; font-weight: 600; cursor: pointer;" onclick="switchScreen('dashboard')">Create New Account</div>
+        </div>
+
+        <!-- ================= SCREEN 6: HOME / DASHBOARD ================= -->
+        <div id="screen-dashboard" class="mobile-screen active">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+
+          <!-- Top Brand Bar -->
+          <div class="dashboard-header">
+            <div class="dash-brand">
+              <span style="color:#DC2626;">+</span> OneHelp
+            </div>
+            <div style="width: 36px; height: 36px; border-radius: 18px; background: #F8FAFC; border: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="switchScreen('settings')">
+              ⚙️
+            </div>
+          </div>
+
+          <!-- Location & Status Strip -->
+          <div class="location-strip">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color:#2563EB; font-size: 18px;">📍</span>
+              <div>
+                <div style="font-size: 10px; font-weight: 700; color: #64748B; text-transform: uppercase;">Your Location</div>
+                <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Jaipur, Rajasthan</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 4px 8px; font-size: 10px; font-weight: 700; color: #16A34A;">📶 Online</div>
+              <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 4px 8px; font-size: 10px; font-weight: 700; color: #16A34A;">🔋 78%</div>
+            </div>
+          </div>
+
+          <!-- Hero SOS Button -->
+          <div class="sos-hero-area">
+            <div class="sos-glow-outer"></div>
+            <div class="sos-glow-mid"></div>
+            <div class="sos-big-btn" onclick="triggerPanicFlow()">
+              <div style="font-size: 38px; font-weight: 900; letter-spacing: 2px;">SOS</div>
+              <div style="font-size: 10px; font-weight: 700; opacity: 0.9;">Press for Emergency</div>
+            </div>
+          </div>
+
+          <!-- Trusted Contacts Card -->
+          <div class="white-card" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="switchScreen('family')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 18px; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 18px;">👥</div>
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #0F172A;">Trusted Contacts</div>
+                <div style="font-size: 12px; color: #64748B;">3 contacts</div>
+              </div>
+            </div>
+            <span style="color:#94A3B8; font-size: 16px;">›</span>
+          </div>
+
+          <!-- Emergency Services -->
+          <div style="padding: 12px 18px 4px; font-size: 15px; font-weight: 800; color: #0F172A;">Emergency Services</div>
+          <div class="services-grid">
+            <div class="service-card" onclick="triggerPanicFlow()">
+              <div class="service-icon-box" style="background:#EFF6FF; border-color:#BFDBFE; color:#2563EB;">👮</div>
+              <div style="font-size: 11px; font-weight: 700; color: #334155;">Police</div>
+            </div>
+            <div class="service-card" onclick="triggerPanicFlow()">
+              <div class="service-icon-box" style="background:#FEF2F2; border-color:#FECACA; color:#DC2626;">🔥</div>
+              <div style="font-size: 11px; font-weight: 700; color: #334155;">Fire</div>
+            </div>
+            <div class="service-card" onclick="triggerPanicFlow()">
+              <div class="service-icon-box" style="background:#FFF1F2; border-color:#FFE4E6; color:#E11D48;">🚑</div>
+              <div style="font-size: 11px; font-weight: 700; color: #334155;">Ambulance</div>
+            </div>
+            <div class="service-card" onclick="triggerPanicFlow()">
+              <div class="service-icon-box" style="background:#FFFBEB; border-color:#FDE68A; color:#D97706;">⚠️</div>
+              <div style="font-size: 11px; font-weight: 700; color: #334155;">Disaster</div>
+            </div>
+          </div>
+
+          <!-- Mobile Bottom Navigation (5 Tabs) -->
+          <div class="mobile-bottom-tabs" style="margin-top: auto;">
+            <div class="tab-item active" onclick="switchScreen('dashboard')">
+              <span class="tab-icon">🏠</span>
+              <span>Home</span>
+            </div>
+            <div class="tab-item" onclick="switchScreen('hazard')">
+              <span class="tab-icon">🗺️</span>
+              <span>Map</span>
+            </div>
+            <div class="tab-item" onclick="switchScreen('helpline')">
+              <span class="tab-icon">📞</span>
+              <span>Helplines</span>
+            </div>
+            <div class="tab-item" onclick="switchScreen('family')">
+              <span class="tab-icon">👥</span>
+              <span>Family</span>
+            </div>
+            <div class="tab-item" onclick="switchScreen('settings')">
+              <span class="tab-icon">•••</span>
+              <span>More</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 7: EMERGENCY ACTIVE ================= -->
+        <div id="screen-emergency" class="mobile-screen">
+          <div class="phone-status-bar dark-status" style="background: #DC2626;"><span>9:41</span><span>100%</span></div>
+          <div class="emerg-banner">
+            <h3 style="font-size: 18px; font-weight: 800;">Emergency Active</h3>
+            <div class="timer-ring-box">
+              <div style="font-size: 22px; font-weight: 900; font-family: monospace;">00:04:32</div>
+              <div style="font-size: 9px; opacity: 0.8; margin-bottom: 8px;">Emergency in Progress</div>
+              <button style="background: #FFF; color: #DC2626; border: none; padding: 4px 14px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer;" onclick="switchScreen('afterAlert')">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Live Location -->
+          <div class="white-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 13px; color: #0F172A;">
+                <span style="color:#DC2626;">📍</span> Live Location
+              </div>
+              <span style="color:#2563EB; font-size: 12px; font-weight: 700; cursor: pointer;" onclick="switchScreen('hazard')">View Map</span>
+            </div>
+            <div style="font-size: 12px; font-weight: 600; color: #475569;">26.9124° N, 75.7873° E</div>
+            <div style="font-size: 13px; font-weight: 800; color: #0F172A; margin: 2px 0 10px;">Near JLN Marg, Jaipur, Rajasthan</div>
+            <div style="height: 60px; background: #E0F2FE; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🗺️📍</div>
+          </div>
+
+          <!-- 3 Status Pills -->
+          <div style="display: flex; gap: 8px; margin: 0 18px 8px;">
+            <div style="flex:1; background:#FFF; border:1px solid #E2E8F0; border-radius:10px; padding:8px; text-align:center; font-size:11px; font-weight:700;">🔋 78%</div>
+            <div style="flex:1; background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; padding:8px; text-align:center; font-size:11px; font-weight:700; color:#DC2626;">📶 Offline</div>
+            <div style="flex:1; background:#FFF; border:1px solid #E2E8F0; border-radius:10px; padding:8px; text-align:center; font-size:11px; font-weight:700; color:#DC2626;">🔴 10s audio</div>
+          </div>
+
+          <!-- Contacts Notified -->
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 14px; margin: 6px 18px; padding: 12px; display: flex; align-items: center; gap: 10px;">
+            <div style="width: 24px; height: 24px; border-radius: 12px; background: #16A34A; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900;">✓</div>
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: #15803D;">Trusted Contacts Notified</div>
+              <div style="font-size: 11px; color: #166534;">Your family has been alerted via SMS.</div>
+            </div>
+          </div>
+
+          <!-- Multi Agency Routing Card -->
+          <div class="white-card" style="cursor: pointer;" onclick="switchScreen('routing')">
+            <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Automatic Routing</div>
+            <div style="font-size: 11px; color: #64748B; margin-bottom: 8px;">Finding best response team...</div>
+            <div style="display: flex; justify-content: space-around; padding-top: 4px;">
+              <span style="font-size: 24px;">👮</span>
+              <span style="font-size: 24px;">🚑</span>
+              <span style="font-size: 24px;">🔥</span>
+              <span style="font-size: 24px;">⚠️</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 9: LIVE HAZARD MAP ================= -->
+        <div id="screen-hazard" class="mobile-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="padding: 10px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F1F5F9;">
+            <span style="cursor:pointer;" onclick="switchScreen('dashboard')">←</span>
+            <strong style="font-size: 16px; color: #0F172A;">Live Hazard Map</strong>
+          </div>
+
+          <!-- Danger Banner -->
+          <div style="background: #FEF2F2; border: 1px solid #FCA5A5; margin: 10px 14px; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">⚠️</span>
+            <div>
+              <div style="font-size: 12px; font-weight: 800; color: #DC2626;">Danger Zone Ahead</div>
+              <div style="font-size: 11px; color: #991B1B;">Flood risk area detected in your region.</div>
+            </div>
+          </div>
+
+          <!-- Map Surface -->
+          <div style="flex:1; background: #E2E8F0; position: relative; overflow: hidden; margin: 0 14px; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+            <div style="position: absolute; width: 140px; height: 140px; border-radius: 70px; background: rgba(220, 38, 38, 0.25); border: 2px dashed #DC2626;"></div>
+            <div style="position: absolute; top: 30%; left: 40%; font-size: 24px;">⚠️</div>
+            <div style="position: absolute; top: 55%; left: 55%; font-size: 24px;">🔥</div>
+            <div style="position: absolute; top: 70%; left: 30%; font-size: 20px;">📍</div>
+          </div>
+
+          <!-- Legend Bar -->
+          <div style="padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 10px; font-size: 11px; font-weight: 600; color: #475569;">
+              <span>🔴 Flood</span>
+              <span>🟠 Fire</span>
+              <span>🟡 Landslide</span>
+            </div>
+            <button style="background: #EFF6FF; border: 1px solid #BFDBFE; color: #2563EB; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer;">Refresh</button>
+          </div>
+
+          <!-- Bottom Tabs -->
+          <div class="mobile-bottom-tabs">
+            <div class="tab-item" onclick="switchScreen('dashboard')"><span class="tab-icon">🏠</span><span>Home</span></div>
+            <div class="tab-item active" onclick="switchScreen('hazard')"><span class="tab-icon">🗺️</span><span>Map</span></div>
+            <div class="tab-item" onclick="switchScreen('helpline')"><span class="tab-icon">📞</span><span>Helplines</span></div>
+            <div class="tab-item" onclick="switchScreen('family')"><span class="tab-icon">👥</span><span>Family</span></div>
+            <div class="tab-item" onclick="switchScreen('settings')"><span class="tab-icon">•••</span><span>More</span></div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 10: AI VOICE STRESS ================= -->
+        <div id="screen-stress" class="mobile-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="padding: 10px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F1F5F9;">
+            <span style="cursor:pointer;" onclick="switchScreen('dashboard')">←</span>
+            <strong style="font-size: 16px; color: #0F172A;">AI Voice Stress Analyzer</strong>
+          </div>
+
+          <div style="padding: 24px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+            <!-- Waveform simulation -->
+            <div style="display: flex; gap: 4px; align-items: center; height: 80px; margin: 18px 0;">
+              <div style="width: 5px; height: 20px; background: #EF4444; border-radius: 3px;"></div>
+              <div style="width: 5px; height: 45px; background: #EF4444; border-radius: 3px;"></div>
+              <div style="width: 5px; height: 75px; background: #EF4444; border-radius: 3px;"></div>
+              <div style="width: 5px; height: 35px; background: #EF4444; border-radius: 3px;"></div>
+              <div style="width: 5px; height: 85px; background: #EF4444; border-radius: 3px;"></div>
+              <div style="width: 5px; height: 55px; background: #EF4444; border-radius: 3px;"></div>
+              <div style="width: 5px; height: 25px; background: #EF4444; border-radius: 3px;"></div>
+              <div style="width: 5px; height: 65px; background: #EF4444; border-radius: 3px;"></div>
+            </div>
+
+            <div style="font-size: 28px; font-weight: 900; font-family: monospace;">00:12</div>
+            <p style="font-size: 12px; color: #64748B; margin-top: 4px; margin-bottom: 24px;">Your voice is being analyzed for stress, panic and distress signals.</p>
+
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 14px; width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; margin-bottom: 16px;">
+              <span style="font-size: 28px;">😊</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Current Status: <span style="color:#16A34A;">Calm</span></div>
+                <div style="font-size: 11px; color: #64748B;">No signs of high stress detected.</div>
+              </div>
+            </div>
+
+            <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 12px; width: 100%; display: flex; align-items: center; gap: 8px; text-align: left;">
+              <span>💡</span>
+              <div style="font-size: 11px; color: #1E40AF; line-height: 16px;">
+                You can also use a voice command like <b>"Help"</b> or <b>"Emergency"</b>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 11: SETTINGS ================= -->
+        <div id="screen-settings" class="mobile-screen" style="background: #F8FAFC;">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="padding: 10px 18px; display: flex; align-items: center; gap: 10px; background: #FFF; border-bottom: 1px solid #E2E8F0;">
+            <span style="cursor:pointer;" onclick="switchScreen('dashboard')">←</span>
+            <strong style="font-size: 16px; color: #0F172A;">Settings</strong>
+          </div>
+
+          <div style="padding: 14px 18px;">
+            <!-- Profile -->
+            <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+              <div style="width: 40px; height: 40px; border-radius: 20px; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 20px;">👤</div>
+              <div style="flex:1;">
+                <div style="font-size: 14px; font-weight: 800; color: #0F172A;">Lokesh Shankhala</div>
+                <div style="font-size: 11px; color: #2563EB; font-weight: 600;">Edit your details</div>
+              </div>
+              <span style="color:#94A3B8;">›</span>
+            </div>
+
+            <!-- Medical Dossier -->
+            <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 16px; cursor: pointer;" onclick="switchScreen('dossier')">
+              <span style="font-size: 22px;">🫀</span>
+              <div style="flex:1;">
+                <div style="font-size: 13px; font-weight: 800; color: #DC2626;">Medical Dossier</div>
+                <div style="font-size: 11px; color: #991B1B;">Your health information</div>
+              </div>
+              <span style="color:#94A3B8;">›</span>
+            </div>
+
+            <!-- Basic Info Table -->
+            <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px;">
+              <div style="font-size: 11px; font-weight: 800; color: #64748B; text-transform: uppercase; margin-bottom: 8px;">Basic Information</div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0;"><span>Age</span><b>22</b></div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0;"><span>Blood Group</span><b>B+</b></div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0;"><span>Allergies</span><b>None</b></div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0;"><span>Conditions</span><b>None</b></div>
+            </div>
+
+            <!-- Tools Link -->
+            <div style="background: #FFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 6px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #F1F5F9; cursor: pointer;" onclick="switchScreen('shakeSettings')">
+                <span style="font-size: 12px; font-weight: 700;">📳 Shake & Power Trigger</span>
+                <span>›</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; cursor: pointer;" onclick="switchScreen('offline')">
+                <span style="font-size: 12px; font-weight: 700;">📡 Offline Mode Status</span>
+                <span>›</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Tabs -->
+          <div class="mobile-bottom-tabs" style="margin-top: auto;">
+            <div class="tab-item" onclick="switchScreen('dashboard')"><span class="tab-icon">🏠</span><span>Home</span></div>
+            <div class="tab-item" onclick="switchScreen('hazard')"><span class="tab-icon">🗺️</span><span>Map</span></div>
+            <div class="tab-item" onclick="switchScreen('helpline')"><span class="tab-icon">📞</span><span>Helplines</span></div>
+            <div class="tab-item" onclick="switchScreen('family')"><span class="tab-icon">👥</span><span>Family</span></div>
+            <div class="tab-item active" onclick="switchScreen('settings')"><span class="tab-icon">•••</span><span>More</span></div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 12: FAMILY CONTACTS ================= -->
+        <div id="screen-family" class="mobile-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F1F5F9;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="cursor:pointer;" onclick="switchScreen('dashboard')">←</span>
+              <strong style="font-size: 16px; color: #0F172A;">Family Contacts</strong>
+            </div>
+            <span style="font-size: 12px; font-weight: 700; color: #2563EB;">Manage</span>
+          </div>
+
+          <div style="padding: 14px 18px;">
+            <div style="font-size: 13px; font-weight: 800; color: #0F172A; margin-bottom: 10px;">3 people</div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Papa</div>
+                  <div style="font-size: 11px; color: #64748B;">+91 87654 32109</div>
+                </div>
+                <div style="font-size: 11px; font-weight: 700; color: #16A34A;">● Online</div>
+              </div>
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Maa</div>
+                  <div style="font-size: 11px; color: #64748B;">+91 98765 43210</div>
+                </div>
+                <div style="font-size: 11px; font-weight: 700; color: #16A34A;">● Online</div>
+              </div>
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #0F172A;">Rohit (Bhai)</div>
+                  <div style="font-size: 11px; color: #64748B;">+91 76543 21098</div>
+                </div>
+                <div style="font-size: 11px; color: #94A3B8;">12m ago</div>
+              </div>
+            </div>
+
+            <button class="btn-primary" style="height: 44px; font-size: 13px; margin-bottom: 16px;" onclick="switchScreen('familyAlert')">+ Add New Contact</button>
+
+            <!-- Family Status -->
+            <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 22px;">🛡️</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 800; color: #15803D;">Family Alert Status</div>
+                <div style="font-size: 11px; color: #166534;">All safe • No active emergencies</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Tabs -->
+          <div class="mobile-bottom-tabs" style="margin-top: auto;">
+            <div class="tab-item" onclick="switchScreen('dashboard')"><span class="tab-icon">🏠</span><span>Home</span></div>
+            <div class="tab-item" onclick="switchScreen('hazard')"><span class="tab-icon">🗺️</span><span>Map</span></div>
+            <div class="tab-item" onclick="switchScreen('helpline')"><span class="tab-icon">📞</span><span>Helplines</span></div>
+            <div class="tab-item active" onclick="switchScreen('family')"><span class="tab-icon">👥</span><span>Family</span></div>
+            <div class="tab-item" onclick="switchScreen('settings')"><span class="tab-icon">•••</span><span>More</span></div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 19: HELPLINES (OFFLINE) ================= -->
+        <div id="screen-helpline" class="mobile-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="padding: 12px 18px; border-bottom: 1px solid #F1F5F9;">
+            <div style="font-size: 18px; font-weight: 900; color: #0F172A;">Helplines (Offline)</div>
+            <div style="font-size: 11px; color: #64748B;">Instant calling without data connection</div>
+          </div>
+
+          <div style="padding: 12px 18px; flex:1; overflow-y:auto;">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-size:13px; font-weight:700;">Emergency Support</div><div style="font-size:10px; color:#64748B;">POLICE / FIRE / MED</div></div>
+                <div style="font-size:16px; font-weight:900; color:#DC2626;">112</div>
+              </div>
+              <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-size:13px; font-weight:700;">Poison Control</div><div style="font-size:10px; color:#64748B;">AIIMS NATIONAL</div></div>
+                <div style="font-size:14px; font-weight:900; color:#DC2626;">1800 11 9494</div>
+              </div>
+              <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-size:13px; font-weight:700;">Mental Health</div><div style="font-size:10px; color:#64748B;">TELE-MANAS</div></div>
+                <div style="font-size:15px; font-weight:900; color:#DC2626;">14416</div>
+              </div>
+              <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-size:13px; font-weight:700;">Women Helpline</div><div style="font-size:10px; color:#64748B;">SAFETY & ABUSE</div></div>
+                <div style="font-size:15px; font-weight:900; color:#DC2626;">1091</div>
+              </div>
+              <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-size:13px; font-weight:700;">Childline</div><div style="font-size:10px; color:#64748B;">CHILD EMERGENCY</div></div>
+                <div style="font-size:15px; font-weight:900; color:#DC2626;">1098</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Tabs -->
+          <div class="mobile-bottom-tabs">
+            <div class="tab-item" onclick="switchScreen('dashboard')"><span class="tab-icon">🏠</span><span>Home</span></div>
+            <div class="tab-item" onclick="switchScreen('hazard')"><span class="tab-icon">🗺️</span><span>Map</span></div>
+            <div class="tab-item active" onclick="switchScreen('helpline')"><span class="tab-icon">📞</span><span>Helplines</span></div>
+            <div class="tab-item" onclick="switchScreen('family')"><span class="tab-icon">👥</span><span>Family</span></div>
+            <div class="tab-item" onclick="switchScreen('settings')"><span class="tab-icon">•••</span><span>More</span></div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 13: MEDICAL DOSSIER ================= -->
+        <div id="screen-dossier" class="mobile-screen" style="background:#F8FAFC;">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="padding: 10px 18px; display: flex; align-items: center; gap: 10px; background:#FFF; border-bottom: 1px solid #E2E8F0;">
+            <span style="cursor:pointer;" onclick="switchScreen('settings')">←</span>
+            <strong style="font-size: 16px; color: #0F172A;">Medical Dossier</strong>
+          </div>
+          <div style="padding: 16px 18px;">
+            <div style="background:#FFF; border-radius:14px; border:1px solid #E2E8F0; padding:12px; display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+              <div style="font-size: 32px;">👨‍⚕️</div>
+              <div>
+                <div style="font-size: 15px; font-weight: 800;">Lokesh Shankhala</div>
+                <div style="font-size: 12px; color: #64748B;">M 22 | B+</div>
+              </div>
+            </div>
+
+            <div style="background:#FFF; border-radius:14px; border:1px solid #E2E8F0; padding:12px;">
+              <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #F1F5F9;"><span>Medical Info</span><b>No major issues</b></div>
+              <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #F1F5F9;"><span>Allergies</span><b>None</b></div>
+              <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #F1F5F9;"><span>Current Meds</span><b>None</b></div>
+              <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #F1F5F9;"><span>Blood Group</span><b>B+</b></div>
+              <div style="display:flex; justify-content:space-between; padding:8px 0;"><span>Emergency Notes</span><b style="color:#2563EB;">Add notes ›</b></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 14: OFFLINE MODE ================= -->
+        <div id="screen-offline" class="mobile-screen" style="padding: 24px; text-align: center;">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="text-align: left; margin-bottom: 20px; cursor: pointer;" onclick="switchScreen('settings')">← Back</div>
+          <div style="font-size: 54px; margin-bottom: 12px;">📡❌</div>
+          <h3 style="font-size: 22px; font-weight: 800; color: #0F172A;">You are Offline</h3>
+          <p style="font-size: 13px; color: #64748B; margin-top: 4px; margin-bottom: 20px;">No internet, SIM or cell towers available.</p>
+
+          <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 12px 16px; text-align: left; margin-bottom: 16px;">
+            <div style="padding: 6px 0; font-size: 13px; font-weight: 600;">✓ Maps (cached)</div>
+            <div style="padding: 6px 0; font-size: 13px; font-weight: 600;">✓ Helplines (cached)</div>
+            <div style="padding: 6px 0; font-size: 13px; font-weight: 600;">✓ Emergency contacts (available)</div>
+            <div style="padding: 6px 0; font-size: 13px; font-weight: 600;">✓ AI assistant (local)</div>
+          </div>
+
+          <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 12px; font-size: 11px; color: #1E40AF; text-align: left; margin-bottom: 24px;">
+            🛡️ <b>Your safety is still protected!</b> OneHelp works offline and will sync when connection returns.
+          </div>
+          <button class="btn-primary" onclick="switchScreen('dashboard')">Try Again</button>
+        </div>
+
+        <!-- ================= SCREEN 17: MULTI-AGENCY ROUTING ================= -->
+        <div id="screen-routing" class="mobile-screen">
+          <div class="phone-status-bar"><span>9:41</span><span>100%</span></div>
+          <div style="padding: 10px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F1F5F9;">
+            <span style="cursor:pointer;" onclick="switchScreen('emergency')">←</span>
+            <strong style="font-size: 16px; color: #0F172A;">Multi-Agency Routing</strong>
+          </div>
+          <div style="padding: 16px 18px;">
+            <div style="font-size: 13px; color: #64748B; margin-bottom: 14px;">Your request is being routed to...</div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+              <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;"><span style="font-size:22px;">👮</span><div><b>Police</b><div style="font-size:11px; color:#16A34A;">● Notified</div></div></div>
+                <div style="font-size:11px; color:#94A3B8;">(0–15s)</div>
+              </div>
+              <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;"><span style="font-size:22px;">🚑</span><div><b>Ambulance</b><div style="font-size:11px; color:#16A34A;">● Notified</div></div></div>
+                <div style="font-size:11px; color:#94A3B8;">(15–30s)</div>
+              </div>
+              <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;"><span style="font-size:22px;">🔥</span><div><b>Fire</b><div style="font-size:11px; color:#16A34A;">● Notified</div></div></div>
+                <div style="font-size:11px; color:#94A3B8;">(30–45s)</div>
+              </div>
+              <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;"><span style="font-size:22px;">⚠️</span><div><b>Disaster Mgmt</b><div style="font-size:11px; color:#16A34A;">● Notified</div></div></div>
+                <div style="font-size:11px; color:#94A3B8;">(45–60s)</div>
+              </div>
+            </div>
+
+            <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 20px; padding: 10px; text-align: center; color: #15803D; font-size: 13px; font-weight: 800; margin-bottom: 20px;">
+              ✓ All agencies alerted
+            </div>
+
+            <button class="btn-primary" onclick="switchScreen('afterAlert')">Proceed to Confirmation</button>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 24: AFTER ALERT ================= -->
+        <div id="screen-afterAlert" class="mobile-screen" style="background:#16A34A; color:#FFF; justify-content:center; align-items:center; padding:32px; text-align:center;">
+          <div style="width: 76px; height: 76px; border-radius: 38px; background: #FFF; color: #16A34A; display: flex; align-items: center; justify-content: center; font-size: 38px; margin-bottom: 20px;">✓</div>
+          <h2 style="font-size: 24px; font-weight: 900;">Help is on the way!</h2>
+          <p style="font-size: 13px; opacity: 0.9; margin: 8px 0 28px;">Your alert has been sent and help is on its way.</p>
+          <button style="width: 100%; height: 48px; border-radius: 12px; background: #FFF; color: #15803D; border: none; font-weight: 800; font-size: 14px; cursor: pointer;" onclick="switchScreen('emergency')">View Details</button>
+          <div style="margin-top: 16px; font-size: 12px; opacity: 0.8; cursor: pointer;" onclick="switchScreen('dashboard')">Back to Dashboard</div>
+        </div>
+
+        <!-- ================= SCREEN 22: DURESS PIN ================= -->
+        <div id="screen-duress" class="mobile-screen" style="background: #0F172A; color: #FFF; padding: 24px; text-align: center;">
+          <div class="phone-status-bar dark-status"><span>9:41</span><span>100%</span></div>
+          <div style="text-align: left; margin-bottom: 24px; cursor: pointer;" onclick="switchScreen('dashboard')">← Cancel</div>
+          <h3 style="font-size: 20px; font-weight: 800;">Enter Duress PIN</h3>
+          <div style="display: flex; gap: 14px; justify-content: center; margin: 24px 0;">
+            <div style="width: 14px; height: 14px; border-radius: 7px; background: #3B82F6;"></div>
+            <div style="width: 14px; height: 14px; border-radius: 7px; background: #3B82F6;"></div>
+            <div style="width: 14px; height: 14px; border-radius: 7px; border: 1.5px solid #475569;"></div>
+            <div style="width: 14px; height: 14px; border-radius: 7px; border: 1.5px solid #475569;"></div>
+          </div>
+          <p style="font-size: 11px; color: #94A3B8; margin-bottom: 32px;">Entering the duress PIN silently alerts police while appearing to cancel.</p>
+
+          <!-- Keypad -->
+          <div style="display: grid; grid-template-columns: repeat(3, 64px); gap: 14px; justify-content: center;">
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">1</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">2</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">3</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">4</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">5</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">6</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">7</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">8</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;">9</button>
+            <div></div>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #FFF; font-size: 20px; font-weight: 700;" onclick="switchScreen('emergency')">0</button>
+            <button style="height: 64px; border-radius: 32px; background: #1E293B; border: 1px solid #334155; color: #94A3B8; font-size: 16px;">⌫</button>
+          </div>
+        </div>
+
+        <!-- ================= SCREEN 18: WIDGET ================= -->
+        <div id="screen-widget" class="mobile-screen" style="background:#0F172A; justify-content:center; align-items:center; padding:24px;">
+          <div style="background:#1E293B; border:1.5px solid #334155; border-radius:24px; padding:20px; width:100%; text-align:center;">
+            <div style="font-size:11px; font-weight:700; color:#94A3B8; text-align:left; text-transform:uppercase;">Quick Access Widget</div>
+            <div style="margin:20px auto; width:80px; height:80px; border-radius:40px; background:#DC2626; color:#FFF; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900; box-shadow:0 0 20px rgba(220,38,38,0.5); cursor:pointer;" onclick="switchScreen('emergency')">SOS</div>
+            <div style="display:flex; justify-content:space-around;">
+              <div><span style="font-size:22px;">👮</span><div style="font-size:10px; color:#CBD5E1; margin-top:4px;">Police</div></div>
+              <div><span style="font-size:22px;">🚑</span><div style="font-size:10px; color:#CBD5E1; margin-top:4px;">Ambulance</div></div>
+              <div><span style="font-size:22px;">🔥</span><div style="font-size:10px; color:#CBD5E1; margin-top:4px;">Fire</div></div>
+            </div>
+          </div>
+          <button style="background:transparent; border:none; color:#94A3B8; margin-top:20px; font-size:12px; cursor:pointer;" onclick="switchScreen('dashboard')">Back to Dashboard</button>
+        </div>
+
+        <!-- ================= SCREEN 25: PUSH NOTIFICATION ================= -->
+        <div id="screen-pushNotif" class="mobile-screen" style="background: #090D16; justify-content:center; align-items:center; padding:24px; text-align:center;">
+          <div style="font-size: 54px; font-weight: 300; color: #FFF; margin-bottom: 4px;">9:41</div>
+          <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 44px;">Mon, 14 Apr</div>
+
+          <div style="background: rgba(255,255,255,0.92); border-radius: 16px; padding: 14px; text-align: left; width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #0F172A;">
+                <span style="color:#DC2626;">🛡️</span> ONEHELP
+              </div>
+              <span style="font-size: 10px; color: #64748B;">now</span>
+            </div>
+            <div style="font-size: 13px; font-weight: 800; color: #DC2626; margin-bottom: 2px;">Emergency Alert</div>
+            <div style="font-size: 12px; color: #334155; line-height: 16px;">Your family has been notified.<br>Location shared 26.9124°N, 75.7873°E</div>
+          </div>
+
+          <button style="background: rgba(255,255,255,0.15); border: none; color: #FFF; padding: 8px 18px; border-radius: 18px; font-size: 12px; margin-top: 36px; cursor: pointer;" onclick="switchScreen('dashboard')">Dismiss</button>
+        </div>
+
+        <!-- ================= SCREEN 26: APP ICON GUIDE ================= -->
+        <div id="screen-appIcon" class="mobile-screen" style="justify-content:center; align-items:center; padding:32px; text-align:center;">
+          <div style="width: 100px; height: 100px; border-radius: 24px; background: #DC2626; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 48px; box-shadow: 0 12px 30px rgba(220,38,38,0.35); margin-bottom: 18px;">
+            +
+          </div>
+          <h2 style="font-size: 26px; font-weight: 900; color: #0F172A;">OneHelp</h2>
+          <p style="font-size: 13px; color: #64748B; margin-top: 4px; margin-bottom: 24px;">Because Help Should Always Be Near.</p>
+          <button class="btn-primary" style="height: 44px; font-size: 13px;" onclick="switchScreen('dashboard')">Launch Dashboard</button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('screensSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar && backdrop) {
+        const isOpen = sidebar.classList.contains('mobile-open');
+        if (isOpen) {
+          sidebar.classList.remove('mobile-open');
+          backdrop.classList.remove('active');
+        } else {
+          sidebar.classList.add('mobile-open');
+          backdrop.classList.add('active');
+        }
+      }
+    }
+
+    function switchScreen(screenKey) {
+      // Hide all screens
+      document.querySelectorAll('.mobile-screen').forEach(el => el.classList.remove('active'));
+
+      // Find target screen
+      const target = document.getElementById('screen-' + screenKey);
+      if (target) {
+        target.classList.add('active');
+        target.scrollTop = 0;
+      }
+
+      // Update sidebar active button and mobile pill label
+      document.querySelectorAll('.nav-screen-btn').forEach(btn => {
+        const matches = btn.getAttribute('onclick')?.includes(screenKey);
+        btn.classList.toggle('active', matches);
+        if (matches) {
+          const pill = document.getElementById('mobilePillLabel');
+          if (pill) {
+            pill.textContent = btn.textContent.trim().replace(/\s+/g, ' ');
+          }
+        }
+      });
+
+      // Close mobile drawer if open
+      const sidebar = document.getElementById('screensSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar) sidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('active');
+    }
+
+    function triggerPanicFlow() {
+      switchScreen('emergency');
+    }
+  </script>
+</body>
+</html>

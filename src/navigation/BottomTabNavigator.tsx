@@ -1,60 +1,147 @@
 import React from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/Feather';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { MapScreen } from '../screens/map/MapScreen';
-import { CirclesScreen } from '../screens/circles/CirclesScreen';
-import { ProfileScreen } from '../screens/profile/ProfileScreen';
-import { useUserStore } from '../store/useUserStore';
-import { defaultTheme } from '../theme/defaultTheme';
-import { childTheme } from '../theme/childTheme';
-import { seniorTheme } from '../theme/seniorTheme';
-import { Platform } from 'react-native';
+import { HelplineDirectoryScreen } from '../screens/helplines/HelplineDirectoryScreen';
+import { FamilyContactsScreen } from '../screens/family/FamilyContactsScreen';
+import { SettingsScreen } from '../screens/profile/SettingsScreen';
+import {
+  HomeIcon,
+  MapIcon,
+  PhoneCallIcon,
+  UsersIcon,
+  MoreHorizontalIcon,
+} from '../components/ui/Icons';
 
-const Tab = createBottomTabNavigator();
+export type BottomTabParamList = {
+  Home: undefined;
+  Map: undefined;
+  Helplines: undefined;
+  Family: undefined;
+  More: undefined;
+};
 
-export const BottomTabNavigator = () => {
-  const { ageMode } = useUserStore();
-  
-  let theme = defaultTheme;
-  if (ageMode === 'child') theme = childTheme;
-  if (ageMode === 'senior') theme = seniorTheme;
+const Tab = createBottomTabNavigator<BottomTabParamList>();
 
+interface BottomTabNavigatorProps {
+  onTriggerSOS: () => void;
+  onOpenMedicalDossier: () => void;
+  onOpenOfflineMode: () => void;
+  onOpenShakeSettings: () => void;
+  onNotifyFamilyModal: () => void;
+  onOpenToolsModal: () => void;
+  onOpenSurvivalGuides?: () => void;
+}
+
+export const BottomTabNavigator: React.FC<BottomTabNavigatorProps> = ({
+  onTriggerSOS,
+  onOpenMedicalDossier,
+  onOpenOfflineMode,
+  onOpenShakeSettings,
+  onNotifyFamilyModal,
+  onOpenToolsModal,
+  onOpenSurvivalGuides,
+}) => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      backBehavior="firstRoute"
+      screenOptions={{
         headerShown: false,
-        tabBarIcon: ({ color, size }) => {
-          let iconName = 'home';
-          
-          if (route.name === 'Home') iconName = 'home';
-          else if (route.name === 'Map') iconName = 'map';
-          else if (route.name === 'Circles') iconName = 'users';
-          else if (route.name === 'Profile') iconName = 'user';
-
-          // Use Feather Icons
-          return <Icon name={iconName} size={theme.tabIconSize} color={color} />;
-        },
-        tabBarActiveTintColor: theme.colors.info,
-        tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarActiveTintColor: '#2563EB',
+        tabBarInactiveTintColor: '#94A3B8',
         tabBarStyle: {
-          backgroundColor: theme.colors.surfaceElevated,
-          borderTopColor: theme.colors.border,
-          height: Platform.OS === 'ios' ? 88 : 68,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-          paddingTop: 12,
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#E2E8F0',
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 84 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+          paddingTop: 8,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 6,
         },
         tabBarLabelStyle: {
-          fontFamily: theme.typography.caption.fontFamily,
-          fontSize: theme.typography.caption.fontSize,
-          marginTop: 4,
+          fontSize: 11,
+          fontWeight: '600',
+          marginTop: 2,
         },
-      })}
+      }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'SOS' }} />
-      <Tab.Screen name="Map" component={MapScreen} options={{ tabBarLabel: 'Map' }} />
-      <Tab.Screen name="Circles" component={CirclesScreen} options={{ tabBarLabel: 'Circles' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
+      <Tab.Screen
+        name="Home"
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color }) => <HomeIcon size={22} color={color} />,
+        }}
+      >
+        {({ navigation }) => (
+          <HomeScreen
+            onTriggerSOS={onTriggerSOS}
+            onOpenSettings={() => navigation.navigate('More')}
+            onOpenFamily={() => navigation.navigate('Family')}
+            onOpenMap={() => navigation.navigate('Map')}
+            onOpenToolsModal={onOpenToolsModal}
+          />
+        )}
+      </Tab.Screen>
+
+      <Tab.Screen
+        name="Map"
+        options={{
+          tabBarLabel: 'Map',
+          tabBarIcon: ({ color }) => <MapIcon size={22} color={color} />,
+        }}
+      >
+        {({ navigation }) => (
+          <MapScreen onBack={() => navigation.navigate('Home')} />
+        )}
+      </Tab.Screen>
+
+      <Tab.Screen
+        name="Helplines"
+        options={{
+          tabBarLabel: 'Helplines',
+          tabBarIcon: ({ color }) => <PhoneCallIcon size={22} color={color} />,
+        }}
+      >
+        {() => (
+          <HelplineDirectoryScreen />
+        )}
+      </Tab.Screen>
+
+      <Tab.Screen
+        name="Family"
+        options={{
+          tabBarLabel: 'Family',
+          tabBarIcon: ({ color }) => <UsersIcon size={22} color={color} />,
+        }}
+      >
+        {() => (
+          <FamilyContactsScreen
+            onNotifyFamilyModal={onNotifyFamilyModal}
+          />
+        )}
+      </Tab.Screen>
+
+      <Tab.Screen
+        name="More"
+        options={{
+          tabBarLabel: 'More',
+          tabBarIcon: ({ color }) => <MoreHorizontalIcon size={22} color={color} />,
+        }}
+      >
+        {() => (
+          <SettingsScreen
+            onOpenMedicalDossier={onOpenMedicalDossier}
+            onOpenOfflineMode={onOpenOfflineMode}
+            onOpenShakeSettings={onOpenShakeSettings}
+            onOpenSurvivalGuides={onOpenSurvivalGuides}
+          />
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };

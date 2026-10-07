@@ -25,7 +25,7 @@ export const HazardPinDropModal: React.FC<{ visible: boolean; onClose: () => voi
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modal}>
           <TypographyText variant="title">Report Hazard</TypographyText>

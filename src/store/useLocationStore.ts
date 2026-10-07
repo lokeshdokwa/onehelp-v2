@@ -24,6 +24,8 @@ interface LocationState {
   // Current position
   location: LocationData | null;
   previousLocation: LocationData | null;
+  address: string | null;
+  fullAddress: string | null;
 
   // Status
   gpsStatus: GPSStatus;
@@ -38,6 +40,8 @@ interface LocationState {
 
   // Actions
   setLocation: (loc: LocationData) => void;
+  setAddress: (addr: string) => void;
+  setFullAddress: (full: string) => void;
   setGPSStatus: (status: GPSStatus) => void;
   setTracking: (active: boolean) => void;
   startTrackMe: (dest: { lat: number; lng: number; label: string }, expiresAt: number) => void;
@@ -50,6 +54,8 @@ interface LocationState {
 export const useLocationStore = create<LocationState>((set, get) => ({
   location: null,
   previousLocation: null,
+  address: null,
+  fullAddress: null,
   gpsStatus: 'initializing',
   isTracking: false,
   lastUpdateAge: 0,
@@ -58,6 +64,9 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   trackMeDestination: null,
   trackMeExpiresAt: 0,
   trackMeDeviationWarning: false,
+
+  setAddress: (address: string) => set({ address }),
+  setFullAddress: (fullAddress: string) => set({ fullAddress }),
 
   setLocation: (loc: LocationData) =>
     set((state) => ({
