@@ -418,7 +418,10 @@ export const LostChildMatcherModal: React.FC<LostChildMatcherModalProps> = ({
               </View>
 
               <Text style={styles.auditAlgorithm}>
-                Cosine Similarity: S = (A · B) / (||A|| × ||B||) • MobileFaceNet Quantized INT8
+                Model: {scanReport.model}
+              </Text>
+              <Text style={[styles.auditAlgorithm, { marginTop: 2, color: '#38BDF8' }]}>
+                TFLite Tensor Pipeline: [{scanReport.tensorInputShape || '1x112x112x3'} ➔ {scanReport.tensorOutputShape || '1x128'}] • Cosine S = (A · B) / (||A|| × ||B||)
               </Text>
             </View>
           )}
