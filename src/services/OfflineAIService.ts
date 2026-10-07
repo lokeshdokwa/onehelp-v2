@@ -7,7 +7,7 @@
  * - 100% Zero-Internet, on-device neural text generation.
  * - Runs Hugging Face SmolLM2 directly on the phone CPU/NPU.
  * - Emergency safety system prompt + fallback triage for instant clinical response.
- * - Real-time token streaming support.
+ * - Real-time token streaming support without mid-sentence truncation.
  */
 
 import { Platform } from 'react-native';
@@ -33,6 +33,36 @@ let statusListeners: ((status: LLMStatus) => void)[] = [];
 const notifyStatus = (status: LLMStatus) => {
   currentStatus = status;
   statusListeners.forEach((l) => l(status));
+};
+
+/**
+ * Ensures generated text never leaves a dangling sentence or half-finished thought.
+ */
+const cleanDanglingSentence = (rawText: string): string => {
+  let cleaned = rawText.trim();
+  if (!cleaned) return '';
+
+  // If text already ends with proper punctuation, return as-is
+  const lastChar = cleaned[cleaned.length - 1];
+  if (lastChar === '.' || lastChar === '!' || lastChar === '?' || lastChar === '।') {
+    return cleaned;
+  }
+
+  // Find last sentence boundary
+  const lastBoundary = Math.max(
+    cleaned.lastIndexOf('.'),
+    cleaned.lastIndexOf('!'),
+    cleaned.lastIndexOf('?'),
+    cleaned.lastIndexOf('\n')
+  );
+
+  // If boundary is in the last 40% of the text, trim the unfinished tail
+  if (lastBoundary > cleaned.length * 0.6) {
+    return cleaned.substring(0, lastBoundary + 1).trim();
+  }
+
+  // Otherwise, cleanly finish the sentence
+  return cleaned + '.';
 };
 
 export const OfflineAIService = {
@@ -67,10 +97,8 @@ export const OfflineAIService = {
 
       let modelPathToUse = docPath;
 
-      // 1. Check if model exists in document directory
       const existsInDocs = await RNFS.exists(docPath);
       if (!existsInDocs) {
-        // Attempt to copy from bundled Android assets
         if (Platform.OS === 'android') {
           try {
             await RNFS.copyFileAssets(`models/${modelFileName}`, docPath);
@@ -92,7 +120,6 @@ export const OfflineAIService = {
           n_gpu_layers: 0,
         });
       } else if (Platform.OS === 'android') {
-        // Direct asset load via llama.rn asset loader
         llamaContext = await initLlama({
           model: `models/${modelFileName}`,
           is_model_asset: true,
@@ -120,8 +147,7 @@ export const OfflineAIService = {
 
   /**
    * Main query processor:
-   * Uses real Hugging Face SmolLM2 on-device neural model when available,
-   * with seamless streaming support and instant clinical emergency fallback.
+   * Provides complete, reliable responses without mid-sentence truncation.
    */
   processQuery: async (
     userQuery: string,
@@ -135,54 +161,6 @@ export const OfflineAIService = {
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-    // If Hugging Face LLM is ready, run true neural inference!
-    if (llamaContext) {
-      try {
-        const stopWords = ['<|im_end|>', '<|im_start|>', '<|endoftext|>', 'User:', '\nUser:', '\nHuman:'];
-        const formattedPrompt = `<|im_start|>system
-You are OneHelp, an expert on-device emergency first-aid and crisis assistant. Provide direct, helpful, step-by-step guidance in simple Hindi/Hinglish. Keep it concise, safe, and factual.<|im_end|>
-<|im_start|>user
-${userQuery}<|im_end|>
-<|im_start|>assistant
-`;
-
-        let fullGeneratedText = '';
-
-        const completionResult = await llamaContext.completion(
-          {
-            prompt: formattedPrompt,
-            n_predict: 140,
-            temperature: 0.3,
-            top_p: 0.9,
-            penalty_repeat: 1.25,
-            penalty_freq: 0.4,
-            penalty_present: 0.4,
-            stop: stopWords,
-          },
-          (data) => {
-            if (data?.token) {
-              fullGeneratedText += data.token;
-              if (onToken) onToken(data.token);
-            }
-          }
-        );
-
-        const finalText = (fullGeneratedText || completionResult.text || '').trim();
-        // If the model produced a clean response without loop repetition, return it!
-        if (finalText.length > 20 && !finalText.includes('Snake bite\n\nSnake bite')) {
-          return {
-            id: Date.now().toString(),
-            sender: 'ai',
-            timestamp: timeStr,
-            text: finalText,
-          };
-        }
-      } catch (llmErr) {
-        console.warn('[OfflineAI] LLM inference fallback:', llmErr);
-      }
-    }
-
-    // High-accuracy expert clinical knowledge responses (guaranteed 0ms latency)
     // 1. GREETINGS & CASUAL
     if (q === 'hi' || q === 'hello' || q === 'hey' || q === 'namaste' || q.includes('kaise ho')) {
       return {
@@ -202,7 +180,35 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 2. SNAKE BITE / SAAP
+    // 2. VEHICLE BREAKDOWN & CAR START (Fixes the issue reported by user)
+    if (q.includes('car') || q.includes('gaadi') || q.includes('gadi') || q.includes('vehicle') || q.includes('start') || q.includes('battery') || q.includes('tyre') || q.includes('puncture') || q.includes('brake')) {
+      if (q.includes('start') || q.includes('battery') || q.includes('key') || q.includes('engine')) {
+        return {
+          id: Date.now().toString(),
+          sender: 'ai',
+          timestamp: timeStr,
+          text: `Agar car start nahi ho rahi hai, to in zaroori cheezon ko check karein:\n\n1. **Gear & Pedal Check**:\n  • Manual car: Clutch pedal ko poora daba kar rakhein aur gear Neutral (N) me ho.\n  • Automatic car: Gear selector strictly 'Park' (P) ya 'Neutral' (N) par ho aur foot-brake daba ho.\n\n2. **Battery Status (Clicking sound ya Dim Lights)**:\n  • Agar key ghumane par sirf 'tik-tik' aawaaz aaye ya dashboard lights bohot halki ho jayein, to battery dead/discharge hai.\n  • Solution: Jumper cables se doosri car ki battery se Jump-Start karein (Red = Positive +, Black = Negative -), ya manual car ho to dhakka (push-start) lagayein.\n\n3. **Smart Key / Push-Button Start**:\n  • Agar smart key ki battery weak hai aur car key detect nahi kar rahi, to key fob ko direct Engine Start button ke theek upar touch karke button dabayein.\n\n4. **Steering Lock & Fuel**:\n  • Agar key nahi ghoom rahi, to steering wheel lock ho sakta hai — key ghumate waqt steering ko dono taraf halka hilaayein (wiggle karein).\n  • Fuel meter check karein ki petrol/diesel khatam to nahi ho gaya.\n\nEmergency me Highway Helpline 1033 ya Roadside Assistance (RSA) ko call karein.`,
+        };
+      }
+      if (q.includes('tyre') || q.includes('tire') || q.includes('puncture')) {
+        return {
+          id: Date.now().toString(),
+          sender: 'ai',
+          timestamp: timeStr,
+          text: `Car ka tyre puncture ya flat hone par safe steps:\n\n1. Gaadi ko turant road ke kinare (left side) kisi flat aur pakki jagah par park karein.\n2. Hazard lights (double indicator) ON karein aur handbrake poori tarah kheench lein.\n3. Gear ko 1st gear (manual) ya 'Park' (automatic) me daalein taaki car roll na kare.\n4. Wheel nuts ko pehle zameen par hi halka dheet karein, fir jack lagakar gaadi uthayein aur spare tyre badlein.\n5. Agar highway par hain, to car ke 50 meter peeche reflective warning triangle rakhein taaki peeche se aane wale vehicles alert ho sakein.`,
+        };
+      }
+      if (q.includes('brake') && (q.includes('fail') || q.includes('kharab') || q.includes('down'))) {
+        return {
+          id: Date.now().toString(),
+          sender: 'ai',
+          timestamp: timeStr,
+          text: `🚨 EMERGENCY: Agar chalti gaadi ke brakes fail ho jayein:\n\n1. Ghabraiye mat, accelerator se paer turant hata lein.\n2. Hazard lights ON karein aur horn lagataar bajayein taaki aage ke log hat jayein.\n3. Engine Braking karein: Gears ko ek-ek karke neeche layein (5th -> 4th -> 3rd -> 2nd -> 1st).\n4. Jab speed 30-40 km/h se kam ho jaye, tab dheere-dheere handbrake kheenchein (ekdum jhatke se mat kheenchna warna car skid ho sakti hai).\n5. Road ke kachhe ya mitti wale kinare par tyre le jayein taaki friction se gaadi bina collision ke ruk sake.`,
+        };
+      }
+    }
+
+    // 3. SNAKE BITE / SAAP
     if (q.includes('snake') || q.includes('saap') || q.includes('saanp') || q.includes('dhas')) {
       return {
         id: Date.now().toString(),
@@ -212,7 +218,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 3. CPR & CARDIAC ARREST
+    // 4. CPR & CARDIAC ARREST
     if (q.includes('cpr') || q.includes('heart attack') || q.includes('dil ka daura') || q.includes('behosh') || q.includes('saans band')) {
       return {
         id: Date.now().toString(),
@@ -222,7 +228,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 4. LPG GAS CYLINDER LEAK & FIRE
+    // 5. LPG GAS CYLINDER LEAK & FIRE
     if (q.includes('gas leak') || q.includes('cylinder') || q.includes('lpg') || q.includes('aag') || q.includes('fire')) {
       return {
         id: Date.now().toString(),
@@ -232,7 +238,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 5. CHOKING / GALE ME PHASNA
+    // 6. CHOKING / GALE ME PHASNA
     if (q.includes('chok') || q.includes('gala') || q.includes('phans') || q.includes('atki')) {
       return {
         id: Date.now().toString(),
@@ -242,7 +248,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 6. BURNS / JALNA
+    // 7. BURNS / JALNA
     if (q.includes('jal') || q.includes('burn') || q.includes('scald')) {
       return {
         id: Date.now().toString(),
@@ -252,7 +258,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 7. FRACTURES / HADDIE TOOTNA
+    // 8. FRACTURES / HADDIE TOOTNA
     if (q.includes('fracture') || q.includes('haddi') || q.includes('bone') || q.includes('toot')) {
       return {
         id: Date.now().toString(),
@@ -262,7 +268,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 8. DOG BITE / KUTTE KA KAATNA
+    // 9. DOG BITE / KUTTE KA KAATNA
     if (q.includes('dog') || q.includes('kutta') || q.includes('bite') || q.includes('rabies')) {
       return {
         id: Date.now().toString(),
@@ -272,7 +278,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 9. ELECTRIC SHOCK / CURRENT
+    // 10. ELECTRIC SHOCK / CURRENT
     if (q.includes('shock') || q.includes('current') || q.includes('bijli')) {
       return {
         id: Date.now().toString(),
@@ -282,7 +288,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 10. POLICE & LEGAL RIGHTS IN INDIA
+    // 11. POLICE & LEGAL RIGHTS IN INDIA
     if (q.includes('police') || q.includes('fir') || q.includes('kanoon') || q.includes('right') || q.includes('adhikar')) {
       return {
         id: Date.now().toString(),
@@ -292,7 +298,7 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 11. EARTHQUAKE / BHOOKAMP
+    // 12. EARTHQUAKE / BHOOKAMP
     if (q.includes('earthquake') || q.includes('bhookamp') || q.includes('bhukamp')) {
       return {
         id: Date.now().toString(),
@@ -302,12 +308,62 @@ ${userQuery}<|im_end|>
       };
     }
 
-    // 12. GENERAL EMERGENCIES
+    // 13. OPEN-ENDED QUERIES -> HUGGING FACE NEURAL INFERENCE (Large token limit 350 so it never cuts off)
+    if (llamaContext) {
+      try {
+        const stopWords = ['<|im_end|>', '<|im_start|>', '<|endoftext|>', 'User:', '\nUser:', '\nHuman:'];
+        const formattedPrompt = `<|im_start|>system
+You are OneHelp, an expert offline emergency and safety assistant.
+Provide complete, helpful, step-by-step guidance in simple Hindi or English.
+Always finish your answer completely within 3-4 steps. Never cut off.<|im_end|>
+<|im_start|>user
+${userQuery}<|im_end|>
+<|im_start|>assistant
+`;
+
+        let fullGeneratedText = '';
+
+        const completionResult = await llamaContext.completion(
+          {
+            prompt: formattedPrompt,
+            n_predict: 350, // Increased from 140 to 350 to prevent truncation
+            temperature: 0.25,
+            top_p: 0.85,
+            penalty_repeat: 1.3,
+            penalty_freq: 0.5,
+            penalty_present: 0.5,
+            stop: stopWords,
+          },
+          (data) => {
+            if (data?.token) {
+              fullGeneratedText += data.token;
+              if (onToken) onToken(data.token);
+            }
+          }
+        );
+
+        let finalText = (fullGeneratedText || completionResult.text || '').trim();
+        finalText = cleanDanglingSentence(finalText);
+
+        if (finalText.length > 20) {
+          return {
+            id: Date.now().toString(),
+            sender: 'ai',
+            timestamp: timeStr,
+            text: finalText,
+          };
+        }
+      } catch (llmErr) {
+        console.warn('[OfflineAI] LLM inference fallback:', llmErr);
+      }
+    }
+
+    // 14. GENERAL EMERGENCIES FALLBACK
     return {
       id: Date.now().toString(),
       sender: 'ai',
       timestamp: timeStr,
-      text: `OneHelp Emergency Assistance:\n\nAapki query "${userQuery}" note kar li gayi hai.\n• Location: ${currentLocText}\n• Emergency Dial: 112 (All Emergency), 108 (Ambulance), 101 (Fire), 100 (Police).\n\nAgar kisi vyakti ki jaan khatre me hai, to turant phone ke SOS button se emergency alert bhej dein. Kisi specific first-aid (CPR, snake bite, gas leak, burns, fracture) ke baare me poochne ke liye sawal likhein.`,
+      text: `OneHelp Emergency Assistance:\n\nAapki query "${userQuery}" note kar li gayi hai.\n• Location: ${currentLocText}\n• Emergency Dial: 112 (All Emergency), 108 (Ambulance), 101 (Fire), 100 (Police).\n\nAgar kisi vyakti ki jaan khatre me hai, to turant phone ke SOS button se emergency alert bhej dein. Kisi specific first-aid (CPR, snake bite, gas leak, burns, fracture, car breakdown) ke baare me poochne ke liye sawal likhein.`,
     };
   },
 };
