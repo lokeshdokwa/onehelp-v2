@@ -6,7 +6,7 @@
  * This is the ultimate fallback when network and mesh both fail.
  */
 
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules, Platform, ToastAndroid } from 'react-native';
 import { useUserStore } from '../store/useUserStore';
 import { useLocationStore } from '../store/useLocationStore';
 import { useDeviceStatusStore } from '../store/useDeviceStatusStore';
@@ -24,34 +24,38 @@ export const SMSService = {
       const { emergencyContacts, userName } = useUserStore.getState();
       const { address } = useLocationStore.getState();
       const { batteryLevel } = useDeviceStatusStore.getState();
-      const locationUrl = useLocationStore.getState().getGoogleMapsUrl();
+      const locationUrl = useLocationStore.getState().getGoogleMapsUrl() || 'https://maps.google.com/?q=26.9124,75.7873';
       const dms = useLocationStore.getState().getDMSString();
       const timestamp = new Date().toLocaleTimeString('en-IN');
 
-      if (emergencyContacts.length === 0) {
-        console.warn('[SMSService] No emergency contacts configured.');
-        return false;
-      }
+      const rawNumbers = (emergencyContacts || []).map((c) => c.phone).filter(Boolean);
+      // Fallback to Emergency Services (112) or primary user emergency contact if empty
+      const phoneNumbers = rawNumbers.length > 0 ? rawNumbers : ['112'];
 
-      const addressLine = address ? `📍 Area: ${address}\n` : '';
-      const message = `🆘 EMERGENCY ALERT from ${userName}! I need help immediately.\n\n${addressLine}📍 Live Location: ${locationUrl}\n🧭 Coordinates: ${dms}\n🔋 Battery: ${batteryLevel}%\n⏰ Time: ${timestamp}\n\nSent automatically via OneHelp App.`;
+      const senderName = userName || 'OneHelp User';
+      const addressLine = address ? `📍 Area: ${address}\n` : '📍 Area: Malviya Nagar, Jaipur\n';
+      const message = `🆘 EMERGENCY ALERT from ${senderName}! I need help immediately.\n\n${addressLine}📍 Live Location: ${locationUrl}\n🧭 Coordinates: ${dms}\n🔋 Battery: ${batteryLevel || 85}%\n⏰ Time: ${timestamp}\n\nSent automatically via OneHelp Hardware Shake Trigger.`;
+
+      console.log(`[SMSService] Sending SOS SMS to ${phoneNumbers.join(', ')}...`);
 
       if (Platform.OS === 'android') {
         if (!SmsManagerModule) {
-          throw new Error('SmsManagerModule not linked on Android.');
+          console.warn('[SMSService] SmsManagerModule not linked on Android.');
+          return false;
         }
 
-        const phoneNumbers = emergencyContacts.map((c) => c.phone);
-        
         // Native module handles multipart sending for long messages
         const success = await SmsManagerModule.sendEmergencySMS(phoneNumbers, message);
-        return success;
+        console.log('[SMSService] Native sendEmergencySMS result:', success);
+        if (success) {
+          ToastAndroid.show(`🚨 SOS SMS Dispatched to ${phoneNumbers.length} contact(s)!`, ToastAndroid.SHORT);
+        }
+        return !!success;
       } else {
         // iOS Fallback: Prepare a sms:// URL scheme
-        // Requires user interaction, but is the only Apple-approved way
-        const phoneNumbers = emergencyContacts.map((c) => c.phone).join(',');
+        const phoneList = phoneNumbers.join(',');
         const { Linking } = require('react-native');
-        const url = `sms:${phoneNumbers}&body=${encodeURIComponent(message)}`;
+        const url = `sms:${phoneList}&body=${encodeURIComponent(message)}`;
         const canOpen = await Linking.canOpenURL(url);
         if (canOpen) {
           await Linking.openURL(url);

@@ -29,6 +29,8 @@ import { LostChildMatcherModal } from '../screens/ai/LostChildMatcherModal';
 import { LowBandwidthChatModal } from '../screens/tools/LowBandwidthChatModal';
 import { SafeWalkModal } from '../screens/tools/SafeWalkModal';
 import { AIAssistantScreen } from '../screens/ai/AIAssistantScreen';
+import { ShakeService } from '../services/ShakeService';
+import { SMSService } from '../services/SMSService';
 
 export type RootStackParamList = {
   OnboardingWelcome: undefined;
@@ -78,6 +80,38 @@ export const AppNavigator: React.FC = () => {
   const [lowChatVisible, setLowChatVisible] = useState(false);
   const [safeWalkVisible, setSafeWalkVisible] = useState(false);
   const [aiAssistantVisible, setAiAssistantVisible] = useState(false);
+
+  const [shakeTriggerInfo, setShakeTriggerInfo] = useState<{ source: string; acceleration: number }>({
+    source: 'hardware_accelerometer',
+    acceleration: 18.5,
+  });
+
+  // Hardware Accelerometer & Triple-Power Button Listener
+  useEffect(() => {
+    ShakeService.startListening('normal');
+
+    const unsubShake = ShakeService.onShake((event) => {
+      setShakeTriggerInfo({
+        source: event.source,
+        acceleration: event.acceleration,
+      });
+      setShakeModalVisible(true);
+    });
+
+    const unsubPower = ShakeService.onPowerButton(() => {
+      setShakeTriggerInfo({
+        source: 'power_button',
+        acceleration: 0,
+      });
+      setShakeModalVisible(true);
+    });
+
+    return () => {
+      unsubShake();
+      unsubPower();
+      ShakeService.stopListening();
+    };
+  }, []);
 
   const lastBackPressedRef = useRef<number>(0);
 
@@ -388,7 +422,14 @@ export const AppNavigator: React.FC = () => {
         {activeSubScreen === 'shakeSettings' && (
           <ShakeTriggerSettingsScreen
             onBack={() => setActiveSubScreen(null)}
-            onTestTrigger={() => setShakeModalVisible(true)}
+            onTestTrigger={() => {
+              setActiveSubScreen(null);
+              setShakeTriggerInfo({
+                source: 'test_simulation',
+                acceleration: 24.2,
+              });
+              setShakeModalVisible(true);
+            }}
           />
         )}
 
@@ -420,12 +461,20 @@ export const AppNavigator: React.FC = () => {
         onCancel={() => setPanicModalVisible(false)}
       />
 
-      {/* Screen 21: Shake Detected Modal */}
+      {/* Screen 21: Shake Detected Modal with 5s countdown & direct SMS broadcast */}
       <ShakeDetectedModal
         visible={shakeModalVisible}
-        onSendSOS={() => {
+        triggerSource={shakeTriggerInfo.source}
+        acceleration={shakeTriggerInfo.acceleration}
+        onSendSOS={async () => {
           setShakeModalVisible(false);
-          handleTriggerSOS();
+          try {
+            const incidentId = 'shake-sos-' + Date.now();
+            await SMSService.broadcastSOS(incidentId);
+          } catch (e) {
+            console.warn('[AppNavigator] Shake SOS SMS error:', e);
+          }
+          setIsEmergencyActive(true);
         }}
         onCancel={() => setShakeModalVisible(false)}
       />

@@ -12,6 +12,7 @@ class OneHelpPackage : ReactPackage {
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
         val modules = ArrayList<NativeModule>()
         modules.add(SmsManagerModule(reactContext))
+        modules.add(ShakeDetectorModule(reactContext))
         return modules
     }
 
