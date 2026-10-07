@@ -537,10 +537,6 @@ export const AppNavigator: React.FC = () => {
       >
         <AIAssistantScreen
           onBack={() => setAiAssistantVisible(false)}
-          onTriggerSOS={handleTriggerSOS}
-          onOpenSiren={() => setSirenVisible(true)}
-          onOpenMorse={() => setMorseVisible(true)}
-          onOpenGuides={() => setSurvivalGuidesVisible(true)}
         />
       </Modal>
 

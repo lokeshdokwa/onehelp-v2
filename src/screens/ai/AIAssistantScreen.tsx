@@ -9,56 +9,42 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
-  Linking,
-  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeftIcon, MapPinIcon, BatteryIcon } from '../../components/ui/Icons';
-import { OfflineAIService, AIResponseMessage, AIResponseAction } from '../../services/OfflineAIService';
-import { useLocationStore } from '../../store/useLocationStore';
-import { useDeviceStatusStore } from '../../store/useDeviceStatusStore';
+import { ArrowLeftIcon } from '../../components/ui/Icons';
+import { OfflineAIService, AIResponseMessage } from '../../services/OfflineAIService';
 
 interface AIAssistantScreenProps {
   onBack: () => void;
-  onTriggerSOS?: () => void;
-  onOpenSiren?: () => void;
-  onOpenMorse?: () => void;
-  onOpenGuides?: () => void;
 }
 
-export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
-  onBack,
-  onTriggerSOS,
-  onOpenSiren,
-  onOpenMorse,
-  onOpenGuides,
-}) => {
+export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({ onBack }) => {
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
-
-  const { address, location } = useLocationStore();
-  const { batteryLevel, isOnline } = useDeviceStatusStore();
 
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<AIResponseMessage[]>([]);
 
   const sampleChips = [
-    '🐍 Snake Bite First-Aid',
-    '❤️ How to do CPR?',
-    '🔥 LPG Cylinder Leak',
-    '🏃 Someone is following me',
-    '🩸 Stop Severe Bleeding',
-    '⚖️ Police Rights (Zero FIR)',
+    'Snake bite first-aid',
+    'How to do CPR?',
+    'LPG cylinder leak',
+    'Someone is following me',
+    'Stop bleeding',
+    'Dog bite rabies',
   ];
 
-  // Initialize with greeting
   useEffect(() => {
-    const initWelcome = async () => {
-      const welcome = await OfflineAIService.processQuery('help');
-      setMessages([welcome]);
-    };
-    initWelcome();
+    // Initial welcome message
+    setMessages([
+      {
+        id: 'welcome_1',
+        sender: 'ai',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        text: `Namaste! Main OneHelp ka Offline Emergency Assistant hoon.\n\nMain aapke phone ke processor par 100% offline chalta hoon (bina kisi internet ke). Kisi bhi medical emergency, first-aid, disaster ya personal safety ke baare me aap mujhse seedha pooch sakte hain.`,
+      },
+    ]);
   }, []);
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -79,9 +65,9 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
 
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    }, 80);
 
-    // Process on-device offline
+    // Natural on-device AI response
     setTimeout(async () => {
       const aiReply = await OfflineAIService.processQuery(text);
       setMessages((prev) => [...prev, aiReply]);
@@ -89,48 +75,9 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
 
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 150);
-    }, 350);
+      }, 100);
+    }, 300);
   };
-
-  const handleActionPress = (action: AIResponseAction) => {
-    switch (action.type) {
-      case 'sos':
-        Alert.alert(
-          '🚨 Trigger Emergency SOS',
-          'Do you want to dispatch SOS coordinates immediately?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Trigger SOS',
-              style: 'destructive',
-              onPress: () => {
-                onBack();
-                if (onTriggerSOS) onTriggerSOS();
-              },
-            },
-          ]
-        );
-        break;
-      case 'call112':
-        Linking.openURL('tel:112');
-        break;
-      case 'siren':
-        onBack();
-        if (onOpenSiren) onOpenSiren();
-        break;
-      case 'morse':
-        onBack();
-        if (onOpenMorse) onOpenMorse();
-        break;
-      case 'guides':
-        onBack();
-        if (onOpenGuides) onOpenGuides();
-        break;
-    }
-  };
-
-  const currentAreaText = address || (location ? `${location.latitude.toFixed(4)}°, ${location.longitude.toFixed(4)}°` : 'Live GPS');
 
   return (
     <KeyboardAvoidingView
@@ -139,40 +86,21 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
     >
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Header */}
+      {/* Clean Modern Header */}
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.7}>
           <ArrowLeftIcon size={22} color="#0F172A" />
         </TouchableOpacity>
-        <View style={styles.headerTitleWrap}>
-          <View style={styles.headerRow}>
-            <Text style={styles.headerTitle}>OneHelp AI Assistant</Text>
-            <View style={styles.offlineBadge}>
-              <Text style={styles.offlineBadgeText}>⚡ 100% OFFLINE</Text>
-            </View>
+        <View style={styles.headerInfo}>
+          <Text style={styles.headerTitle}>OneHelp Assistant</Text>
+          <View style={styles.headerSubRow}>
+            <View style={styles.statusDot} />
+            <Text style={styles.headerSub}>Offline • On-Device</Text>
           </View>
-          <Text style={styles.headerSub}>On-Device Neural Engine • Zero Data Used</Text>
         </View>
       </View>
 
-      {/* Hardware Telemetry Bar */}
-      <View style={styles.telemetryBar}>
-        <View style={styles.telemetryItem}>
-          <MapPinIcon size={13} color="#2563EB" />
-          <Text style={styles.telemetryText} numberOfLines={1}>
-            {currentAreaText}
-          </Text>
-        </View>
-        <View style={styles.telemetryItem}>
-          <BatteryIcon size={13} color={batteryLevel <= 20 ? '#DC2626' : '#16A34A'} />
-          <Text style={styles.telemetryText}>{batteryLevel}% Battery</Text>
-        </View>
-        <View style={styles.telemetryItem}>
-          <Text style={styles.dotOnline}>{isOnline ? '🟢 Online' : '✈️ Airplane / Offline'}</Text>
-        </View>
-      </View>
-
-      {/* Messages Scroll Area */}
+      {/* Chat Messages */}
       <ScrollView
         ref={scrollViewRef}
         style={styles.chatArea}
@@ -183,45 +111,16 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
           <View
             key={msg.id}
             style={[
-              styles.msgWrapper,
-              msg.sender === 'user' ? styles.msgWrapperUser : styles.msgWrapperAI,
+              styles.msgRow,
+              msg.sender === 'user' ? styles.msgRowUser : styles.msgRowAI,
             ]}
           >
-            {msg.sender === 'ai' && (
-              <View style={styles.aiAvatar}>
-                <Text style={styles.aiAvatarText}>🤖</Text>
-              </View>
-            )}
-
             <View
               style={[
                 styles.bubble,
                 msg.sender === 'user' ? styles.userBubble : styles.aiBubble,
-                msg.severity === 'critical' && styles.bubbleCritical,
-                msg.severity === 'urgent' && styles.bubbleUrgent,
               ]}
             >
-              {msg.severity && (
-                <View
-                  style={[
-                    styles.severityBadge,
-                    msg.severity === 'critical'
-                      ? styles.badgeCrit
-                      : msg.severity === 'urgent'
-                      ? styles.badgeUrg
-                      : styles.badgeInfo,
-                  ]}
-                >
-                  <Text style={styles.severityText}>
-                    {msg.severity === 'critical'
-                      ? '🚨 CRITICAL EMERGENCY'
-                      : msg.severity === 'urgent'
-                      ? '⚠️ URGENT ADVISORY'
-                      : 'ℹ️ PROTOCOL GUIDANCE'}
-                  </Text>
-                </View>
-              )}
-
               <Text
                 style={[
                   styles.msgText,
@@ -230,54 +129,10 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
               >
                 {msg.text}
               </Text>
-
-              {/* Warnings Box */}
-              {msg.warnings && msg.warnings.length > 0 && (
-                <View style={styles.warningsBox}>
-                  <Text style={styles.warningsTitle}>⛔ STRICTLY AVOID / WARNINGS:</Text>
-                  {msg.warnings.map((w, idx) => (
-                    <Text key={idx} style={styles.warningItem}>
-                      {w}
-                    </Text>
-                  ))}
-                </View>
-              )}
-
-              {/* Step by step list */}
-              {msg.steps && msg.steps.length > 0 && (
-                <View style={styles.stepsBox}>
-                  <Text style={styles.stepsTitle}>📋 STEP-BY-STEP ACTIONS:</Text>
-                  {msg.steps.map((st, idx) => (
-                    <Text key={idx} style={styles.stepItem}>
-                      {st}
-                    </Text>
-                  ))}
-                </View>
-              )}
-
-              {/* Action Buttons inside message */}
-              {msg.actions && msg.actions.length > 0 && (
-                <View style={styles.actionsRow}>
-                  {msg.actions.map((act, idx) => (
-                    <TouchableOpacity
-                      key={idx}
-                      style={[
-                        styles.actionBtn,
-                        { backgroundColor: act.color || '#2563EB' },
-                      ]}
-                      onPress={() => handleActionPress(act)}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={styles.actionBtnText}>{act.label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-
               <Text
                 style={[
-                  styles.timeText,
-                  msg.sender === 'user' ? styles.userTimeText : styles.aiTimeText,
+                  styles.timestamp,
+                  msg.sender === 'user' ? styles.userTimestamp : styles.aiTimestamp,
                 ]}
               >
                 {msg.timestamp}
@@ -287,24 +142,21 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
         ))}
 
         {isTyping && (
-          <View style={[styles.msgWrapper, styles.msgWrapperAI]}>
-            <View style={styles.aiAvatar}>
-              <Text style={styles.aiAvatarText}>🤖</Text>
-            </View>
+          <View style={[styles.msgRow, styles.msgRowAI]}>
             <View style={[styles.bubble, styles.aiBubble, styles.typingBubble]}>
-              <Text style={styles.typingText}>OneHelp AI is analyzing...</Text>
+              <Text style={styles.typingText}>OneHelp is thinking...</Text>
             </View>
           </View>
         )}
       </ScrollView>
 
-      {/* Quick Suggestion Chips */}
-      <View style={styles.chipsContainer}>
+      {/* Suggestion Chips */}
+      <View style={styles.chipsRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
           {sampleChips.map((chip, idx) => (
             <TouchableOpacity
               key={idx}
-              style={styles.chipBtn}
+              style={styles.chip}
               onPress={() => handleSendMessage(chip)}
               activeOpacity={0.7}
             >
@@ -314,7 +166,7 @@ export const AIAssistantScreen: React.FC<AIAssistantScreenProps> = ({
         </ScrollView>
       </View>
 
-      {/* Input Bar */}
+      {/* Clean Normal Input Bar */}
       <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <TextInput
           style={styles.textInput}
@@ -348,108 +200,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
   },
   backBtn: {
     padding: 6,
-    marginRight: 8,
+    marginRight: 10,
   },
-  headerTitleWrap: {
+  headerInfo: {
     flex: 1,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   headerTitle: {
     fontSize: 17,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#0F172A',
   },
-  offlineBadge: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
+  headerSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2,
   },
-  offlineBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#16A34A',
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#16A34A',
   },
   headerSub: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#64748B',
-    marginTop: 2,
     fontWeight: '500',
-  },
-  telemetryBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  telemetryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  telemetryText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  dotOnline: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#0F172A',
   },
   chatArea: {
     flex: 1,
   },
   chatContent: {
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     gap: 12,
   },
-  msgWrapper: {
+  msgRow: {
     flexDirection: 'row',
-    marginVertical: 4,
+    marginVertical: 2,
   },
-  msgWrapperUser: {
+  msgRowUser: {
     justifyContent: 'flex-end',
   },
-  msgWrapperAI: {
+  msgRowAI: {
     justifyContent: 'flex-start',
-  },
-  aiAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#EFF6FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: '#DBEAFE',
-  },
-  aiAvatarText: {
-    fontSize: 18,
   },
   bubble: {
     maxWidth: '82%',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 18,
   },
   userBubble: {
     backgroundColor: '#2563EB',
@@ -462,42 +268,13 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 1,
   },
-  bubbleCritical: {
-    borderColor: '#FECACA',
-    backgroundColor: '#FFF5F5',
-  },
-  bubbleUrgent: {
-    borderColor: '#FED7AA',
-    backgroundColor: '#FFFBEB',
-  },
-  severityBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  badgeCrit: {
-    backgroundColor: '#FEE2E2',
-  },
-  badgeUrg: {
-    backgroundColor: '#FEF3C7',
-  },
-  badgeInfo: {
-    backgroundColor: '#E0F2FE',
-  },
-  severityText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#991B1B',
-  },
   msgText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 14.5,
+    lineHeight: 22,
   },
   userMsgText: {
     color: '#FFFFFF',
@@ -505,86 +282,29 @@ const styles = StyleSheet.create({
   },
   aiMsgText: {
     color: '#1E293B',
+    fontWeight: '400',
   },
-  warningsBox: {
-    backgroundColor: '#FEF2F2',
-    borderLeftWidth: 3,
-    borderLeftColor: '#DC2626',
-    padding: 10,
-    borderRadius: 6,
-    marginTop: 10,
-  },
-  warningsTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#991B1B',
-    marginBottom: 4,
-  },
-  warningItem: {
-    fontSize: 12,
-    color: '#B91C1C',
-    lineHeight: 17,
-    marginVertical: 2,
-    fontWeight: '600',
-  },
-  stepsBox: {
-    backgroundColor: '#F0FDF4',
-    borderLeftWidth: 3,
-    borderLeftColor: '#16A34A',
-    padding: 10,
-    borderRadius: 6,
-    marginTop: 10,
-  },
-  stepsTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#166534',
-    marginBottom: 4,
-  },
-  stepItem: {
-    fontSize: 12,
-    color: '#15803D',
-    lineHeight: 18,
-    marginVertical: 2,
-    fontWeight: '500',
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 12,
-  },
-  actionBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  actionBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  timeText: {
+  timestamp: {
     fontSize: 10,
     marginTop: 6,
     alignSelf: 'flex-end',
   },
-  userTimeText: {
+  userTimestamp: {
     color: '#BFDBFE',
   },
-  aiTimeText: {
+  aiTimestamp: {
     color: '#94A3B8',
   },
   typingBubble: {
     paddingVertical: 10,
+    paddingHorizontal: 14,
   },
   typingText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#64748B',
     fontStyle: 'italic',
   },
-  chipsContainer: {
+  chipsRow: {
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',
@@ -594,18 +314,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     gap: 8,
   },
-  chipBtn: {
+  chip: {
     backgroundColor: '#F1F5F9',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
   chipText: {
     fontSize: 12,
-    fontWeight: '600',
     color: '#334155',
+    fontWeight: '500',
   },
   inputBar: {
     flexDirection: 'row',
@@ -626,7 +346,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#0F172A',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#E2E8F0',
   },
   sendBtn: {
     width: 40,
@@ -642,6 +362,6 @@ const styles = StyleSheet.create({
   sendBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '700',
   },
 });

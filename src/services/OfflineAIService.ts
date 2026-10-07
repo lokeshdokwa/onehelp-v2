@@ -1,418 +1,310 @@
 /**
  * OfflineAIService.ts
  * 
- * Ultra-Lightweight On-Device Emergency AI Engine for OneHelp.
- * Operates with 100% ZERO internet connection, zero cloud API dependencies,
- * and near-zero memory footprint (< 1 MB RAM), ensuring flawless real-time
- * execution on entry-level Android devices.
- * 
- * Features:
- * - Multilingual parsing: Hindi, Hinglish, and English.
- * - Expert-vetted triage for:
- *   1. Medical Emergencies (Snake bite, CPR, Choking, Severe Bleeding, Burns, Poison, Cardiac, etc.)
- *   2. Natural & Structural Disasters (Earthquake, Flood, Fire, Gas Cylinder Leak, Lightning)
- *   3. Crime & Personal Threat (Stalking, Harassment, Robbery, Road Rage, Domestic Violence)
- *   4. Legal & Police Rights in India (Zero FIR, Section 46 CrPC for women, free legal aid)
- * - Context-aware injection (GPS coordinates, street address, battery level).
+ * On-Device Emergency Conversational Engine for OneHelp.
+ * Operates 100% offline with zero internet, zero cloud dependencies.
+ * Provides natural, human-like clinical and emergency assistance in Hindi, Hinglish, and English.
  */
 
 import { useLocationStore } from '../store/useLocationStore';
 import { useDeviceStatusStore } from '../store/useDeviceStatusStore';
-
-export interface AIResponseAction {
-  label: string;
-  type: 'sos' | 'call112' | 'siren' | 'morse' | 'guides';
-  color?: string;
-}
 
 export interface AIResponseMessage {
   id: string;
   sender: 'ai' | 'user';
   text: string;
   timestamp: string;
-  severity?: 'critical' | 'urgent' | 'info';
-  warnings?: string[];
-  steps?: string[];
-  actions?: AIResponseAction[];
 }
 
 export const OfflineAIService = {
-  /**
-   * Main query engine: processes natural language input offline and generates
-   * clinical/tactical emergency guidance.
-   */
   processQuery: async (userQuery: string): Promise<AIResponseMessage> => {
     const q = userQuery.toLowerCase().trim();
     const loc = useLocationStore.getState();
     const dev = useDeviceStatusStore.getState();
     const currentLocText = loc.address || (loc.location ? `${loc.location.latitude.toFixed(4)}°, ${loc.location.longitude.toFixed(4)}°` : 'Location acquired');
-    const batteryText = `${dev.batteryLevel}%`;
 
     const now = new Date();
     const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-    // 1. SNAKE BITE / SAAP
-    if (
-      q.includes('snake') ||
-      q.includes('saap') ||
-      q.includes('saanp') ||
-      q.includes('dhas') ||
-      q.includes('bite') && (q.includes('snake') || q.includes('saap'))
-    ) {
+    // 1. GREETINGS & CASUAL
+    if (q === 'hi' || q === 'hello' || q === 'hey' || q === 'namaste' || q.includes('kaise ho')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'critical',
-        text: `⚠️ SNAKE BITE EMERGENCY PROTOCOL (सांप के काटने पर तुरंत क्या करें):
-Location recorded: ${currentLocText}. Keep calm, 70% snakes are non-venomous or dry bites.`,
-        warnings: [
-          '❌ DO NOT cut the wound or try to suck venom (जहर चूसने या चीरा लगाने की गलती न करें).',
-          '❌ DO NOT tie a tight tourniquet (रस्सी या तार से खून का दौरा पूरी तरह न रोकें).',
-          '❌ DO NOT apply ice or battery/electric shock.',
-        ],
-        steps: [
-          '1. Patient ko bilkul shaant rakhein aur chalne-phirne na dein (Movement se zeher tezi se failta hai).',
-          '2. Bite wale hisse (haath/paer) par se ring, ghadi ya tight kapde turant utaar dein.',
-          '3. Bite wale ang ko DIL (Heart) ke level se neeche rakhein.',
-          '4. Agar broad bandage ho to gentle pressure bandage lagayein (ungli ghus sake utna loose).',
-          '5. Turant nazdeeki government hospital ya district hospital le jayein jahan Anti-Snake Venom (ASV) available ho.',
-        ],
-        actions: [
-          { label: '🚨 Trigger Emergency SOS', type: 'sos', color: '#DC2626' },
-          { label: '📞 Call 108 Ambulance', type: 'call112', color: '#16A34A' },
-        ],
+        text: `Namaste! Main OneHelp ka Offline Emergency Assistant hoon. 
+
+Main aapke phone me bina internet ke chalta hoon. Agar koi medical emergency, accident, disaster ya personal threat ho, to aap mujhse seedha Hindi ya English me pooch sakte hain. 
+
+Aapko abhi kis cheez me madad chahiye?`,
       };
     }
 
-    // 2. CPR / CARDIAC ARREST / UNCONSCIOUS / DIL KA DAURA
-    if (
-      q.includes('cpr') ||
-      q.includes('heart') ||
-      q.includes('dil') ||
-      q.includes('cardiac') ||
-      q.includes('unconscious') ||
-      q.includes('behosh') ||
-      q.includes('saans nahi')
-    ) {
+    if (q.includes('thank') || q.includes('dhanyawad') || q.includes('shukriya')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'critical',
-        text: `❤️ CPR & SUDDEN CARDIAC COLLAPSE PROTOCOL (सीने की मालिश / सांस रुकने पर):
-Victim is unresponsive and not breathing normally. Immediate action saves life.`,
-        warnings: [
-          '❌ Agar vyakti hosh me hai aur saans le raha hai to CPR na dein.',
-          '❌ Compressions ke beech me haath mat uthayein, chest ko poora recoil hone dein.',
-        ],
-        steps: [
-          '1. Safety Check: Scene safe hai ya nahi dekhein. Patient ke kandhe thapthapayein: "Kya aap theek hain?"',
-          '2. Call for Help: SOS trigger karein aur 108 Ambulance ko call karein.',
-          '3. Hand Position: Apne dono haath victim ki chhaati ke bilkul beech (Breastbone/Sternum) par rakhein.',
-          '4. Push Hard & Fast: Chhaati ko 2 se 2.4 inch (5-6 cm) gehra dabayein. Speed: 100-120 beats per minute (e.g. song "Stayin Alive" ki beat).',
-          '5. Cycle: 30 baar chhaati dabayein, fir 2 baar mooh se saans (Rescue Breaths) dein. Agar akele hain to lagataar Chest Compressions jaari rakhein.',
-        ],
-        actions: [
-          { label: '🚨 Trigger Emergency SOS', type: 'sos', color: '#DC2626' },
-          { label: '📞 Call 108 Ambulance', type: 'call112', color: '#16A34A' },
-          { label: '🩺 Open CPR Metronome Guide', type: 'guides', color: '#2563EB' },
-        ],
+        text: `Aapka swagat hai. Apna dhyan rakhein aur surakshit rahein. Kisi bhi emergency me main hamesha offline available hoon.`,
       };
     }
 
-    // 3. BLEEDING / KHOON / CUT / HEMORRHAGE
-    if (
-      q.includes('bleed') ||
-      q.includes('khoon') ||
-      q.includes('chot') ||
-      q.includes('wound') ||
-      q.includes('cut') ||
-      q.includes('blood')
-    ) {
+    // 2. SNAKE BITE / SAAP
+    if (q.includes('snake') || q.includes('saap') || q.includes('saanp') || q.includes('dhas')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'urgent',
-        text: `🩸 SEVERE BLEEDING CONTROL (खून रोकने का इमरजेंसी तरीका):
-Severe blood loss can cause hypovolemic shock within minutes.`,
-        warnings: [
-          '❌ Ghav me dhasa hua koi bada kaanch ya loha bahar mat nikalein (isse khoon aur tezi se bahega).',
-          '❌ Ghav par mitti, haldi ya tel na lagayein infection se bachne ke liye.',
-        ],
-        steps: [
-          '1. Direct Pressure: Saaf kapda ya gauze ghav par rakh kar dono haatho se lagataar 10-15 minute tak zor se dabayein.',
-          '2. Do Not Lift: Kapda khoon se bheenj jaye to use hatayein mat, uske upar doosra kapda rakh kar dabate rahein.',
-          '3. Elevate: Agar haath ya paer me chot hai aur haddi nahi tooti hai, to ang ko dil ke level se upar uthayein.',
-          '4. Tourniquet: Agar haath ya paer se khoon pichkari ki tarah phoot raha ho (arterial bleed), to ghav ke 2-3 inch upar tight kapda ya belt baandhein aur time note karein.',
-        ],
-        actions: [
-          { label: '🚨 Send SOS with GPS', type: 'sos', color: '#DC2626' },
-          { label: '📞 Call 108 Medical', type: 'call112', color: '#16A34A' },
-        ],
+        text: `Agar saap ne kaat liya hai, to sabse pehle ghabraiye mat — lagbhag 70% saap zehreelay nahi hote ya dry bite karte hain.
+
+Aapko turant ye steps follow karne hain:
+• Vyakti ko bilkul shaant rakhein aur chalne-phirne na dein, kyunki hilne-dulne se dil tezi se dhadakta hai aur zeher shareer me tezi se failta hai.
+• Kaati hui jagah (haath ya paer) se ghadi, ring, ya tight kapde turant utaar dein, kyunki wahan sujan (swelling) aayegi.
+• Bite wale hisse ko dil ke level se neeche rakhein.
+• Ghav ko saaf paani se halka dho lein aur saaf kapde se halka cover karein.
+
+Dhyan rahe: Ghav par cheera lagana, muh se zeher choosna, ya taar/rassi se tight baandhna bilkul galat aur jaanleva hai. Turant nazdeeki government hospital le jayein jahan Anti-Snake Venom (ASV) injection available ho.`,
       };
     }
 
-    // 4. CHOKING / GALE ME PHANSA / HEIMLICH
-    if (
-      q.includes('chok') ||
-      q.includes('atki') ||
-      q.includes('phansa') ||
-      q.includes('gale') ||
-      q.includes('swallow')
-    ) {
+    // 3. CPR / CARDIAC ARREST / DIL KA DAURA / BEHOSH
+    if (q.includes('cpr') || q.includes('heart') || q.includes('dil') || q.includes('cardiac') || q.includes('behosh') || q.includes('unconscious') || q.includes('saans')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'critical',
-        text: `🫁 CHOKING & AIRWAY BLOCKAGE (गले में खाना या वस्तु अटकने पर):
-If the person cannot speak, cough or breathe, act immediately.`,
-        warnings: [
-          '❌ Agar vyakti zor se khaans raha hai to beech me mat tokein, khaansne dein.',
-          '❌ Blind finger sweep mat karein jab tak object saaf aankho se na dikhe.',
-        ],
-        steps: [
-          '1. 5 Back Blows: Vyakti ko thoda aage jhukayein aur peeth par dono kandho ke beech haath ki hatheli se 5 baar zor se maarein.',
-          '2. Heimlich Maneuver: Vyakti ke peeche khade ho kar dono haath uski naabhi (Navel) ke theek upar rakhein.',
-          '3. Inward & Upward: Mutthi bana kar andar aur upar ki taraf (J-shape) 5 baar zor se jhatka dein.',
-          '4. Repeat: 5 Back blows aur 5 Abdominal thrusts tab tak karein jab tak object bahar na aa jaye.',
-          '5. If Unconscious: Agar vyakti behosh ho jaye to use zameen par lita kar turant CPR shuru karein.',
-        ],
-        actions: [
-          { label: '🚨 Trigger SOS Alert', type: 'sos', color: '#DC2626' },
-          { label: '📞 Call 108 Ambulance', type: 'call112', color: '#16A34A' },
-        ],
+        text: `Agar vyakti behosh hai aur saans nahi le raha, to turant CPR shuru karein — har ek second keemti hai:
+
+1. Response check karein: Kandhe thapthapayein aur zor se puchein "Kya aap theek hain?". Agar koi harkat na ho, to turant 108 Ambulance ko call karwayein.
+2. Haath ki position: Apne dono haath vyakti ki chhaati ke theek beech me (breastbone par) ek ke upar ek rakhein.
+3. Chhaati dabayein (Chest Compressions):
+   • Chhaati ko lagbhag 2 se 2.5 inch gehra dabayein.
+   • Speed: 100 se 120 beats per minute (tez aur lagataar dabayein).
+   • 30 baar chhaati dabayein, fir 2 baar muh se saans dein (agar akele hain to lagataar chhaati dabate rahein).
+
+Jab tak ambulance na aaye ya vyakti hosh me na aaye, compressions rokein mat.`,
       };
     }
 
-    // 5. GAS CYLINDER LEAK / LPG SMELL
-    if (
-      q.includes('gas') ||
-      q.includes('cylinder') ||
-      q.includes('lpg') ||
-      q.includes('leak') ||
-      q.includes('smell')
-    ) {
+    // 4. BLEEDING / KHOON
+    if (q.includes('bleed') || q.includes('khoon') || q.includes('wound') || q.includes('chot') || q.includes('cut')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'critical',
-        text: `🔥 LPG CYLINDER LEAK PROTOCOL (गैस लीकेज की स्थिति में सुरक्षा):
-LPG gas is heavier than air and settles near the floor. Any spark can cause explosion.`,
-        warnings: [
-          '❌ DO NOT touch any electrical switches — ON ya OFF bilkul na karein (switch spark se aag lagti hai).',
-          '❌ Matchstick, lighter, mombatti, ya agarbatti bilkul na jalayein.',
-          '❌ Room ke andar mobile phone ka flashlight ya call use na karein.',
-        ],
-        steps: [
-          '1. Sabhi khidkiyan aur darwaaze turant poore khol dein taaki taazi hawa andar aaye.',
-          '2. Cylinder ke regulator ko OFF karein aur safety cap laga dein agar sambhav ho.',
-          '3. Ghar ke sabhi members ko turant bahar khuli hawa me le jayein.',
-          '4. Bahar khuli jagah jakar Gas Agency Emergency (1906) ya Fire Service (101) ko call karein.',
-        ],
-        actions: [
-          { label: '📞 Call 101 Fire Brigade', type: 'call112', color: '#DC2626' },
-          { label: '🚨 Trigger SOS Alert', type: 'sos', color: '#F59E0B' },
-        ],
+        text: `Khoon rokne ke liye sabse zaroori cheez hai Direct Pressure:
+
+• Kisi saaf kapde, towel ya bandage se ghav par dono haatho se lagataar 10-15 minute tak zor se dabayein.
+• Kapde ko utha-utha kar baar-baar mat dekhein ki khoon ruka ya nahi. Agar kapda bheenj jaye to uske upar ek aur kapda rakh kar dabayein.
+• Agar chot haath ya paer me hai aur haddi nahi tooti hai, to us ang ko dil ke level se upar utha kar rakhein.
+• Agar khoon pichkari ki tarah phoot raha ho (Arterial Bleed), to ghav ke 2-3 inch upar tight kapda ya belt baandhein (Tourniquet) aur turant hospital bhaagein.
+
+Ghav me dhasa hua koi bada kanch ya loha khud se bahar na nikalein.`,
       };
     }
 
-    // 6. FIRE / AAG / BUILDING ESCAPE
-    if (
-      q.includes('fire') ||
-      q.includes('aag') ||
-      q.includes('burn') ||
-      q.includes('dhuan') ||
-      q.includes('smoke')
-    ) {
+    // 5. CHOKING / GALE ME PHANSA
+    if (q.includes('chok') || q.includes('atki') || q.includes('phansa') || q.includes('gale')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'critical',
-        text: `🚒 FIRE EVACUATION & BURNS PROTOCOL (आग लगने पर बचाव एवं प्राथमिक उपचार):`,
-        warnings: [
-          '❌ Aag lagne par LIFT / ELEVATOR ka istemaal kabhi na karein, sirf seedhiyo se jayein.',
-          '❌ Dhuyein me seedhe khade hokar na daudein (dhuaan jaanleva hota hai).',
-          '❌ Jali hui skin par Toothpaste, barf (ice) ya tel na lagayein.',
-        ],
-        steps: [
-          '1. Crawl Low Under Smoke: Dhuan upar uthta hai, isliye zameen ke paas reng kar (crawl) bahar nikalein.',
-          '2. Wet Cloth: Agar sambhav ho to naak aur mooh par geela kapda bandhein.',
-          '3. Check Doors: Darwaaza kholne se pehle haath ke pichle hisse se handle chhoo kar dekhein agar garam hai to na kholein.',
-          '4. Stop, Drop, and Roll: Agar kapdo me aag lage to bhagein nahi, zameen par let kar roll karein.',
-          '5. Burns Care: Jali hui skin par turant 15-20 minute tak behata hua thanda paani dalein.',
-        ],
-        actions: [
-          { label: '📞 Call 101 Fire Rescue', type: 'call112', color: '#DC2626' },
-          { label: '🔊 Sound Loud Siren', type: 'siren', color: '#EA580C' },
-        ],
+        text: `Gale me kuch phansne par agar vyakti bol ya saans nahi le pa raha hai:
+
+1. Peeth par 5 baar maarein (Back Blows):
+   • Vyakti ko aage ki taraf jhukayein.
+   • Dono kandho ke beech apni hatheli ke pichle hisse se 5 baar zor se maarein.
+
+2. Heimlich Maneuver:
+   • Vyakti ke peeche khade ho kar apne dono haath uske pet par, naabhi (navel) ke theek upar rakhein.
+   • Mutthi bana kar andar aur upar ki taraf (J-shape me) 5 baar zor se jhatka dein.
+
+Ye cycle tab tak repeat karein jab tak phansi hui cheez bahar na nikal jaye. Agar vyakti behosh ho jaye to turant zameen par lita kar CPR shuru karein.`,
       };
     }
 
-    // 7. EARTHQUAKE / BHOOKAMP
-    if (
-      q.includes('earthquake') ||
-      q.includes('bhookamp') ||
-      q.includes('bhukamp') ||
-      q.includes('hil') ||
-      q.includes('tremor')
-    ) {
+    // 6. GAS CYLINDER LEAK / LPG
+    if (q.includes('gas') || q.includes('cylinder') || q.includes('lpg') || q.includes('leak')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'critical',
-        text: `🏢 EARTHQUAKE SURVIVAL PROTOCOL (भूकंप के झटके आने पर तुरंत क्या करें):`,
-        warnings: [
-          '❌ Kampan ke dauran seedhiyo ya lift ki taraf mat bhagein.',
-          '❌ Khidkiyo, kaanch, aur bhari almirah ke paas khade na rahein.',
-        ],
-        steps: [
-          '1. DROP (झुके): Turant haatho aur ghutno ke bal zameen par baithein.',
-          '2. COVER (छिपे): Kisi majboot mez (table) ya bed ke neeche sir aur gardan cover karein.',
-          '3. HOLD ON (पकड़े): Jab tak jhatke rukein nahi, table ke paaye ko pakad kar baithe rahein.',
-          '4. If Outside: Imarato, bijli ke khambho aur pedo se door khule maidan me jayein.',
-          '5. Post-Quake: Gas aur bijli ke main switch band karein aur aftershocks ke liye taiyaar rahein.',
-        ],
-        actions: [
-          { label: '🚨 Send Disaster SOS with GPS', type: 'sos', color: '#DC2626' },
-          { label: '🔦 Flash Optical SOS Strobe', type: 'morse', color: '#F59E0B' },
-        ],
+        text: `LPG Cylinder leak me sabse bada khatra aag ya blast ka hota hai:
+
+Sabse pehle ye bilkul mat karein:
+• Koi bhi bijli ka switch ON ya OFF bilkul na karein (switch ke tiny spark se bhi gas me aag lag sakti hai).
+• Matchstick, lighter ya agarbatti bilkul na jalayein.
+• Room ke andar phone use na karein.
+
+Turant ye karein:
+1. Ghar ke sabhi darwaaze aur khidkiyan poori tarah khol dein taaki gas bahar nikal sake.
+2. Cylinder ke regulator ko band karein aur safety cap laga dein.
+3. Sabhi logo ko ghar se bahar khuli hawa me le jayein.
+4. Bahar nikal kar Gas Helpline 1906 ya Fire 101 par call karein.`,
       };
     }
 
-    // 8. STALKING / SUSPICIOUS PERSON / PEECHA / DANGER
-    if (
-      q.includes('follow') ||
-      q.includes('peecha') ||
-      q.includes('stalk') ||
-      q.includes('dar') ||
-      q.includes('unsafe') ||
-      q.includes('gunda') ||
-      q.includes('threat') ||
-      q.includes('chhed')
-    ) {
+    // 7. FIRE / AAG / BURNS
+    if (q.includes('fire') || q.includes('aag') || q.includes('burn') || q.includes('dhuan') || q.includes('jal')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'urgent',
-        text: `🛡️ PERSONAL THREAT & ANTI-STALKING TACTICS (कोई पीछा कर रहा हो तो तुरंत बचाव):
-Your location is active: ${currentLocText}. Stay calm and assertive.`,
-        warnings: [
-          '❌ Sunsaan galiyo ya andhere me short-cut lene ki galti na karein.',
-          '❌ Darr kar akele kisi sunsaan building ya corner me mat ghusein.',
-        ],
-        steps: [
-          '1. Head to Crowded Area: Turant kisi roshni wali dukaan, petrol pump, metro station ya hotel me ghus jayein.',
-          '2. Fake Call Deception: App ka "Fake Call" tool on karein aur aawaaz me baat karein: "Haan Inspector uncle, main bas 2 minute me mod par aa gaya."',
-          '3. Alert Trusted Contacts: SafeWalk chalu karein ya Trusted Family Alert se turant live GPS link share karein.',
-          '4. Direct Help: Kisi dukaan wale ya aate-jaate logo se direct bole: "Ye shakhs mera peecha kar raha hai, please meri madad karein."',
-          '5. If in Immediate Attack: 120dB Loud Siren button dabayein taaki aas-paas ke log aakar gher lein.',
-        ],
-        actions: [
-          { label: '📞 Fake Call Deterrent', type: 'siren', color: '#2563EB' },
-          { label: '🚨 Silent SOS Alert', type: 'sos', color: '#DC2626' },
-          { label: '📞 Call 112 / Women Helpline 1091', type: 'call112', color: '#16A34A' },
-        ],
+        text: `Aag aur jalne ki sthiti me:
+
+Aag lagne par:
+• Dhuaan hamesha upar uthta hai, isliye zameen par rengte hue (crawl karte hue) bahar nikalein.
+• Naak aur muh par geela kapda baandh lein.
+• Kabhi bhi LIFT ka use na karein, sirf seedhiyo se jayein.
+• Agar kapdo me aag lag jaye to Stop, Drop and Roll (bhagein mat, zameen par let kar ghoomein).
+
+Agar skin jal gayi ho:
+• Jale hue hisse par 15-20 minute tak behata hua sadharan thanda paani dalein.
+• Barf (ice), toothpaste ya tel bilkul na lagayein, isse tissue damage hota hai.
+• Faphole (blisters) ko kabhi na phodein.`,
       };
     }
 
-    // 9. POLICE RIGHTS / LEGAL / ZERO FIR / WOMEN ARREST
-    if (
-      q.includes('police') ||
-      q.includes('fir') ||
-      q.includes('arrest') ||
-      q.includes('kanoon') ||
-      q.includes('rights') ||
-      q.includes('legal')
-    ) {
+    // 8. EARTHQUAKE / BHOOKAMP
+    if (q.includes('earthquake') || q.includes('bhookamp') || q.includes('bhukamp') || q.includes('hil')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'info',
-        text: `⚖️ YOUR CONSTITUTIONAL & EMERGENCY POLICE RIGHTS IN INDIA:`,
-        warnings: [
-          '❌ Police station me kabhi blank kaagaz par sign na karein.',
-        ],
-        steps: [
-          '1. Zero FIR: Agar ghatna kisi aur ilaqe me hui hai, tab bhi koi bhi police station FIR likhne se inkaar nahi kar sakta (Supreme Court Guidelines).',
-          '2. Women Arrest Rules (Sec 46(4) CrPC): Mahila ko suraj doobne ke baad aur sooraj nikalne se pehle bina Magistrate ke order ke arrest nahi kiya ja sakta, aur sirf lady police officer hi arrest kar sakti hai.',
-          '3. Free Medical Aid: Kisi bhi emergency ya road accident me hospital police FIR ka intezar kiye bina pehle ilaaj shuru karne ke liye baadhya hai (Good Samaritan Law).',
-          '4. Right to Call: Giraftar hone par aapko apne parivaar ya vakeel ko call karne ka qanooni haq hai (Article 22(1)).',
-          '5. Free Legal Aid: Agar aap vakeel afford nahi kar sakte to NALSA/DLSA dwara government free lawyer provide karti hai.',
-        ],
-        actions: [
-          { label: '📞 Call 112 National Police', type: 'call112', color: '#2563EB' },
-        ],
+        text: `Bhookamp ke jhatke aane par 'Drop, Cover, and Hold' ka niyam yaad rakhein:
+
+1. Drop (Neeche jhukein): Apne haatho aur ghutno ke bal zameen par baith jayein.
+2. Cover (Sir dhakein): Kisi majboot mez (table) ya bed ke neeche ghus kar apne sir aur gardan ko bachayein.
+3. Hold (Pakad kar rakhein): Jab tak jhatke rukein nahi, table ko pakde rahein.
+
+Agar aap bahar hain to imarato, pedo aur bijli ke khambho se door khule maidan me khade ho jayein. Jhatke rukne ke baad lift ki jagah seedhiyo se bahar nikalein.`,
       };
     }
 
-    // 10. ELECTRIC SHOCK / BIJLI
-    if (
-      q.includes('electric') ||
-      q.includes('shock') ||
-      q.includes('current') ||
-      q.includes('bijli')
-    ) {
+    // 9. STALKING / SUSPICIOUS PERSON / PEECHA / DANGER
+    if (q.includes('follow') || q.includes('peecha') || q.includes('stalk') || q.includes('dar') || q.includes('unsafe') || q.includes('threat')) {
       return {
         id: Date.now().toString(),
         sender: 'ai',
         timestamp: timeStr,
-        severity: 'critical',
-        text: `⚡ ELECTRIC SHOCK EMERGENCY PROTOCOL (बिजली का करंट लगने पर):`,
-        warnings: [
-          '❌ DO NOT touch victim directly with bare hands while they are in contact with electricity (apne haatho se seedha mat chhooein).',
-        ],
-        steps: [
-          '1. Break the Circuit: Turant ghar ka Main MCB / Power Switch band karein.',
-          '2. Separate Victim: Agar switch door hai, to lakdi (wood), plastic ki jhadu ya sukhe kapde se victim ko taar se door karein.',
-          '3. Check Pulse & Breathing: Hosh me nahi hai to turant CPR shuru karein.',
-          '4. Treat Burns: Jale hue ang par saaf sukha kapda daalein aur hospital le jayein.',
-        ],
-        actions: [
-          { label: '🚨 Trigger SOS Alert', type: 'sos', color: '#DC2626' },
-          { label: '📞 Call 108 Ambulance', type: 'call112', color: '#16A34A' },
-        ],
+        text: `Agar koi aapka peecha kar raha hai ya aapko khatra mehsoos ho raha hai:
+
+• Sunsaan galiyo me akele mat jayein. Turant kisi roshni wali dukaan, petrol pump, metro station ya restaurant me ghus jayein.
+• Fake Call ka use karein aur phone par zor se baat karein jaise aap kisi police officer ya family member se baat kar rahe hain: "Haan main bus stop par khada hoon, aap 2 minute me aa rahe ho na?".
+• Agar darr lag raha hai to seedha kisi dukaan-daar ya aas-paas ke logo ko bole: "Ye aadmi mera peecha kar raha hai, please meri madad kijiye."
+• Direct danger me OneHelp ka 120dB Siren bajayein aur 112 par call karein.
+
+Aapka GPS location active hai (${currentLocText}), zaroorat padne par SOS trigger karein.`,
       };
     }
 
-    // 11. GENERAL EMERGENCY / DEFAULT INTELLIGENT TRIAGE
+    // 10. POLICE & LEGAL RIGHTS / ZERO FIR
+    if (q.includes('police') || q.includes('fir') || q.includes('arrest') || q.includes('kanoon') || q.includes('right')) {
+      return {
+        id: Date.now().toString(),
+        sender: 'ai',
+        timestamp: timeStr,
+        text: `Bhartiya kanoon ke anusar aapke mukhya adhikar:
+
+1. Zero FIR: Agar ghatna kisi doosre shehar ya thane ke ilaqe me hui hai, tab bhi koi bhi police station FIR darj karne se mana nahi kar sakta.
+2. Mahilaon ke adhikar: Section 46 CrPC ke tahat mahila ko suraj dhalne ke baad aur suraj nikalne se pehle magistrate ke order ke bina arrest nahi kiya ja sakta, aur sirf lady police officer hi arrest kar sakti hai.
+3. Medical Emergency (Good Samaritan Law): Kisi bhi accident victim ko hospital lane par police ya hospital pehle ilaaj shuru karegi, FIR ya court ke chakkar me ilaaj nahi roka ja sakta.
+4. Arrest hone par adhikar: Aapko turant apne vakeel ya parivaar ko call karne ka qanooni haq hai.`,
+      };
+    }
+
+    // 11. ELECTRIC SHOCK / BIJLI
+    if (q.includes('electric') || q.includes('shock') || q.includes('current') || q.includes('bijli')) {
+      return {
+        id: Date.now().toString(),
+        sender: 'ai',
+        timestamp: timeStr,
+        text: `Bijli ka current lagne par:
+
+• Sabse pehle ghar ka Main MCB / Power Switch turant band karein.
+• Victim ko apne nange haatho se seedha mat chhooie. Lakdi (dry wood), plastic ki dandi ya sukhe kapde se victim ko taar se alag karein.
+• Current alag hone ke baad check karein ki kya vyakti saans le raha hai. Agar saans nahi hai to turant CPR shuru karein.
+• Jali hui jagah par saaf sukha kapda daal kar hospital le jayein.`,
+      };
+    }
+
+    // 12. FRACTURE / TOOTI HADDI / MOCH
+    if (q.includes('fracture') || q.includes('haddi') || q.includes('moch') || q.includes('sprain') || q.includes('bone')) {
+      return {
+        id: Date.now().toString(),
+        sender: 'ai',
+        timestamp: timeStr,
+        text: `Haddi tootne (Fracture) ya moch aane par:
+
+• Toote hue ang ko bilkul hilayein mat. Kisi lakdi, scale ya card-board ko kapde se baandh kar ang ko seedha sahara dein (Splint).
+• Moch par R.I.C.E formula use karein:
+  - Rest (Aaram karein)
+  - Ice (Barf ki sikai kapde me lapet kar karein)
+  - Compression (Crepe bandage halki baandhein)
+  - Elevation (Pair ya haath ko takiye par uncha rakhein)
+• Tooti hui haddi ko khud seedha karne ki koshish na karein, turant X-ray karwayein.`,
+      };
+    }
+
+    // 13. DOG BITE / KUTTE KA KAATNA / RABIES
+    if (q.includes('dog') || q.includes('kutta') || q.includes('rabies') || q.includes('animal')) {
+      return {
+        id: Date.now().toString(),
+        sender: 'ai',
+        timestamp: timeStr,
+        text: `Kutte ya kisi janwar ke kaatne par:
+
+1. Sabse zaroori step: Ghav ko behate hue paani aur sabun (soap) se lagataar 15 minute tak acche se dhoiye. Sabun rabies ke virus ko kaafi hadd tak destroy karta hai.
+2. Dettol ya Betadine lagayein. Ghav par patti ya bandage tightly mat baandhein (ise khula ya loose cover rakhein).
+3. Turant 24 ghante ke andar government hospital jakar Anti-Rabies Vaccine (ARV) aur Tetanus ka injection lagwayein. Rabies 100% fatal bimari hai, isliye injection lagwana mandatory hai.`,
+      };
+    }
+
+    // 14. DROWNING / PAANI ME DOOBNA
+    if (q.includes('drown') || q.includes('doob') || q.includes('water')) {
+      return {
+        id: Date.now().toString(),
+        sender: 'ai',
+        timestamp: timeStr,
+        text: `Paani me doobe vyakti ko bahar nikalne par:
+
+1. Pehle dekhein kya vyakti saans le raha hai.
+2. Agar saans nahi le raha to turant 5 baar muh se saans (Rescue Breaths) dein.
+3. Fir 30 compressions aur 2 breaths ka CPR cycle shuru karein.
+4. Patient ke pet se paani nikalne ke liye pet dabane ki koshish na karein (isse vomiting ho sakti hai aur lungs me ja sakti hai), seedha CPR par focus karein.
+5. Geelay kapde nikal kar warm kambal me lapetein aur hospital le jayein.`,
+      };
+    }
+
+    // 15. SEIZURE / MIRGI / DAURA
+    if (q.includes('seizure') || q.includes('mirgi') || q.includes('daura') || q.includes('fits')) {
+      return {
+        id: Date.now().toString(),
+        sender: 'ai',
+        timestamp: timeStr,
+        text: `Mirgi ya daura (Seizure) aane par:
+
+• Vyakti ko zameen par aaram se letayein aur sir ke neeche naram takiya ya kapda rakhein.
+• Aas-paas ki nukili cheezein hata dein taaki chot na lage.
+• Vyakti ko karwat (side recovery position) me ghumayein taaki thook ya vomiting se saans na ruke.
+• Dhyan rahe: Muh me chammach, ungli ya joota soonghana bilkul galat aur harmful hai. Vyakti ko zabardasti pakadne ki koshish na karein, daura aamtaur par 1-3 minute me khud shaant ho jata hai.`,
+      };
+    }
+
+    // 16. GENERAL / FALLBACK INTELLIGENT CLINICAL TRIAGE
     return {
       id: Date.now().toString(),
       sender: 'ai',
       timestamp: timeStr,
-      severity: 'urgent',
-      text: `🤖 OneHelp Offline AI Assistant:
-I am running 100% on-device in offline mode. 
-Live Telemetry: ${currentLocText} | Battery: ${batteryText}.
+      text: `Maine aapka sawal samjha: "${userQuery}".
 
-I can give you immediate life-saving first-aid and tactics for:
-• 🐍 Snake Bite & Poisoning (सांप का काटना)
-• ❤️ CPR, Cardiac Arrest & Breathing Loss (हार्ट अटैक और CPR)
-• 🩸 Severe Bleeding & Fractures (खून रोकना और चोट)
-• 🫁 Choking & Airway Block (गले में अटकना)
-• 🔥 LPG Cylinder Leak & Fire Escape (आग और गैस लीकेज)
-• 🏢 Earthquake & Flood Survival (भूकंप और बाढ़)
-• 🛡️ Anti-Stalking & Personal Danger (पीछा करना या हमला)
-• ⚖️ Police & Legal Rights (Zero FIR और गिरफ्तारी के नियम)
+Kisi bhi emergency ya medical condition me primary rule hota hai:
+1. Patient ke hosh (responsiveness) aur saans (breathing) check karein.
+2. Agar chot lagi hai to saaf kapde se direct dabav bana kar khoon rokein.
+3. Patient ko aaramdayak sthiti me lita kar halka garam rakhein.
+4. Agar sthiti gambhir hai to bina deri kiye 108 Ambulance ya 112 par call karein.
 
-Please ask your question or tap an emergency action below:`,
-      steps: [
-        'Stay Calm: Take a deep breath and assess your surroundings for immediate hazards.',
-        'If in life-threatening danger, hold the Panic Button for 3 seconds to dispatch SOS coordinates.',
-      ],
-      actions: [
-        { label: '🚨 Trigger Emergency SOS', type: 'sos', color: '#DC2626' },
-        { label: '📞 Call 112 Emergency', type: 'call112', color: '#16A34A' },
-        { label: '🔊 Sound Loud Siren', type: 'siren', color: '#EA580C' },
-        { label: '🩺 Open Offline Medical Guides', type: 'guides', color: '#2563EB' },
-      ],
+Aap specific sawal pooch sakte hain jaise saap ka kaatna, CPR, gas leak, jalna, fracture, ya police rights.`,
     };
   },
 };
