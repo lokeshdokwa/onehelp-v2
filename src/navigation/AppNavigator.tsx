@@ -28,6 +28,7 @@ import { LiveDispatcherTrackerModal } from '../screens/tools/LiveDispatcherTrack
 import { LostChildMatcherModal } from '../screens/ai/LostChildMatcherModal';
 import { LowBandwidthChatModal } from '../screens/tools/LowBandwidthChatModal';
 import { SafeWalkModal } from '../screens/tools/SafeWalkModal';
+import { AIAssistantScreen } from '../screens/ai/AIAssistantScreen';
 
 export type RootStackParamList = {
   OnboardingWelcome: undefined;
@@ -76,6 +77,7 @@ export const AppNavigator: React.FC = () => {
   const [lostChildVisible, setLostChildVisible] = useState(false);
   const [lowChatVisible, setLowChatVisible] = useState(false);
   const [safeWalkVisible, setSafeWalkVisible] = useState(false);
+  const [aiAssistantVisible, setAiAssistantVisible] = useState(false);
 
   const lastBackPressedRef = useRef<number>(0);
 
@@ -83,6 +85,10 @@ export const AppNavigator: React.FC = () => {
   useEffect(() => {
     const onBackPress = () => {
       // 1. Close any visible modal first
+      if (aiAssistantVisible) {
+        setAiAssistantVisible(false);
+        return true;
+      }
       if (fakeCallVisible) {
         setFakeCallVisible(false);
         return true;
@@ -216,6 +222,7 @@ export const AppNavigator: React.FC = () => {
     lostChildVisible,
     lowChatVisible,
     safeWalkVisible,
+    aiAssistantVisible,
     activeSubScreen,
     isRoutingActive,
     isAfterAlertActive,
@@ -233,7 +240,8 @@ export const AppNavigator: React.FC = () => {
   };
 
   const handleToolSelect = (toolId: string) => {
-    if (toolId === 'fakeCall') setFakeCallVisible(true);
+    if (toolId === 'aiAssistant') setAiAssistantVisible(true);
+    else if (toolId === 'fakeCall') setFakeCallVisible(true);
     else if (toolId === 'siren') setSirenVisible(true);
     else if (toolId === 'morse') setMorseVisible(true);
     else if (toolId === 'survivalGuides') setSurvivalGuidesVisible(true);
@@ -288,6 +296,7 @@ export const AppNavigator: React.FC = () => {
             onNotifyFamilyModal={() => setActiveSubScreen('trustedFamilyAlert')}
             onOpenToolsModal={() => setQuickToolsVisible(true)}
             onOpenSurvivalGuides={() => setSurvivalGuidesVisible(true)}
+            onOpenAIAssistant={() => setAiAssistantVisible(true)}
           />
         </NavigationContainer>
       )}
@@ -366,6 +375,10 @@ export const AppNavigator: React.FC = () => {
           <OfflineModeScreen
             onBack={() => setActiveSubScreen(null)}
             onRetry={() => setActiveSubScreen(null)}
+            onOpenAIAssistant={() => {
+              setActiveSubScreen(null);
+              setAiAssistantVisible(true);
+            }}
           />
         )}
 
@@ -514,6 +527,22 @@ export const AppNavigator: React.FC = () => {
         onClose={() => setSafeWalkVisible(false)}
         onTriggerSOS={handleTriggerSOS}
       />
+
+      {/* 100% Offline AI Emergency Assistant Modal */}
+      <Modal
+        visible={aiAssistantVisible}
+        animationType="slide"
+        statusBarTranslucent={true}
+        onRequestClose={() => setAiAssistantVisible(false)}
+      >
+        <AIAssistantScreen
+          onBack={() => setAiAssistantVisible(false)}
+          onTriggerSOS={handleTriggerSOS}
+          onOpenSiren={() => setSirenVisible(true)}
+          onOpenMorse={() => setMorseVisible(true)}
+          onOpenGuides={() => setSurvivalGuidesVisible(true)}
+        />
+      </Modal>
 
       {/* Quick Tools & Feature Selector */}
       <QuickToolsModal

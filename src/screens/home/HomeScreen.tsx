@@ -36,6 +36,7 @@ interface HomeScreenProps {
   onOpenMap?: () => void;
   onOpenService?: (service: 'police' | 'fire' | 'ambulance' | 'disaster') => void;
   onOpenToolsModal?: () => void;
+  onOpenAIAssistant?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -45,6 +46,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenMap,
   onOpenService,
   onOpenToolsModal,
+  onOpenAIAssistant,
 }) => {
   const { status } = useSOSStore();
   const location = useLocationStore((s) => s.location);
@@ -280,6 +282,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* AI Emergency Assistant Offline Card */}
+        {onOpenAIAssistant && (
+          <TouchableOpacity
+            style={styles.aiAssistantCard}
+            onPress={onOpenAIAssistant}
+            activeOpacity={0.8}
+          >
+            <View style={styles.aiCardLeft}>
+              <View style={styles.aiIconBubble}>
+                <Text style={styles.aiIconEmoji}>🤖</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.aiTitleRow}>
+                  <Text style={styles.aiCardTitle}>AI Emergency Assistant</Text>
+                  <View style={styles.aiOfflinePill}>
+                    <Text style={styles.aiOfflinePillText}>100% OFFLINE</Text>
+                  </View>
+                </View>
+                <Text style={styles.aiCardSubtitle} numberOfLines={1}>
+                  Instant medical triage, CPR & disaster guidance
+                </Text>
+              </View>
+            </View>
+            <ChevronRightIcon size={18} color="#2563EB" />
+          </TouchableOpacity>
+        )}
 
         {/* Bottom Helper Bar for Quick Trigger Simulator */}
         {onOpenToolsModal && (
@@ -581,8 +610,68 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#334155',
   },
+  aiAssistantCard: {
+    marginTop: 22,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  aiCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    marginRight: 8,
+  },
+  aiIconBubble: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+  },
+  aiIconEmoji: {
+    fontSize: 22,
+  },
+  aiTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  aiCardTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  aiOfflinePill: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  aiOfflinePillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#16A34A',
+  },
+  aiCardSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
+  },
   testTriggersBtn: {
-    marginTop: 28,
+    marginTop: 14,
     backgroundColor: '#EFF6FF',
     borderWidth: 1,
     borderColor: '#BFDBFE',

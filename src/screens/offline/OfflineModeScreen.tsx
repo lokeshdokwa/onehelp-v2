@@ -13,11 +13,13 @@ import { ArrowLeftIcon, CheckIcon } from '../../components/ui/Icons';
 interface OfflineModeScreenProps {
   onBack?: () => void;
   onRetry?: () => void;
+  onOpenAIAssistant?: () => void;
 }
 
 export const OfflineModeScreen: React.FC<OfflineModeScreenProps> = ({
   onBack,
   onRetry,
+  onOpenAIAssistant,
 }) => {
   return (
     <SafeAreaView style={styles.container}>
@@ -62,7 +64,13 @@ export const OfflineModeScreen: React.FC<OfflineModeScreenProps> = ({
           <CheckItem label="Maps (cached)" />
           <CheckItem label="Helplines (cached)" />
           <CheckItem label="Emergency contacts (available)" />
-          <CheckItem label="AI assistant (local)" isLast />
+          {onOpenAIAssistant ? (
+            <TouchableOpacity onPress={onOpenAIAssistant} activeOpacity={0.7}>
+              <CheckItem label="🤖 AI assistant (local) • Tap to Open" isLast />
+            </TouchableOpacity>
+          ) : (
+            <CheckItem label="AI assistant (local)" isLast />
+          )}
         </View>
 
         {/* Protection Banner */}

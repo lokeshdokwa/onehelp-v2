@@ -29,7 +29,8 @@ export type ToolId =
   | 'liveTracker'
   | 'lostChild'
   | 'lowChat'
-  | 'safeWalk';
+  | 'safeWalk'
+  | 'aiAssistant';
 
 interface QuickToolsModalProps {
   visible: boolean;
@@ -69,6 +70,7 @@ export const QuickToolsModal: React.FC<QuickToolsModalProps> = ({
     {
       category: 'FIRST-AID & MEDICAL RESPONSE',
       items: [
+        { id: 'aiAssistant', title: 'Offline AI Emergency Assistant', icon: '🤖', desc: '100% on-device AI for medical triage, CPR & crisis guidance' },
         { id: 'survivalGuides', title: 'Offline First-Aid & Survival Guides', icon: '🩺', desc: 'Offline medical, CPR & disaster step-by-step guides' },
         { id: 'lostChild', title: 'Lost Child AI Face Matcher', icon: '👦', desc: 'On-device biometric photo match for missing persons' },
         { id: 'stress', title: 'AI Voice Stress Analyzer', icon: '📊', desc: 'Acoustic voice analysis for distress detection' },
