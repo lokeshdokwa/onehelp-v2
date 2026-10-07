@@ -240,26 +240,28 @@ export const AppNavigator: React.FC = () => {
   };
 
   const handleToolSelect = (toolId: string) => {
-    if (toolId === 'aiAssistant') setAiAssistantVisible(true);
-    else if (toolId === 'fakeCall') setFakeCallVisible(true);
-    else if (toolId === 'siren') setSirenVisible(true);
-    else if (toolId === 'morse') setMorseVisible(true);
-    else if (toolId === 'survivalGuides') setSurvivalGuidesVisible(true);
-    else if (toolId === 'liveTracker') setLiveTrackerVisible(true);
-    else if (toolId === 'lostChild') setLostChildVisible(true);
-    else if (toolId === 'lowChat') setLowChatVisible(true);
-    else if (toolId === 'safeWalk') setSafeWalkVisible(true);
-    else if (toolId === 'widget') setWidgetModalVisible(true);
-    else if (toolId === 'shakeModal') setShakeModalVisible(true);
-    else if (toolId === 'duress') setActiveSubScreen('duressPIN');
-    else if (toolId === 'voice') setVoiceModalVisible(true);
-    else if (toolId === 'stress') setActiveSubScreen('voiceStress');
-    else if (toolId === 'pushNotif') setPushNotifVisible(true);
-    else if (toolId === 'routing') setIsRoutingActive(true);
-    else if (toolId === 'afterAlert') setIsAfterAlertActive(true);
-    else if (toolId === 'familyAlert') setActiveSubScreen('trustedFamilyAlert');
-    else if (toolId === 'offline') setActiveSubScreen('offlineMode');
-    else if (toolId === 'shakeSettings') setActiveSubScreen('shakeSettings');
+    setTimeout(() => {
+      if (toolId === 'aiAssistant') setAiAssistantVisible(true);
+      else if (toolId === 'fakeCall') setFakeCallVisible(true);
+      else if (toolId === 'siren') setSirenVisible(true);
+      else if (toolId === 'morse') setMorseVisible(true);
+      else if (toolId === 'survivalGuides') setSurvivalGuidesVisible(true);
+      else if (toolId === 'liveTracker') setLiveTrackerVisible(true);
+      else if (toolId === 'lostChild') setLostChildVisible(true);
+      else if (toolId === 'lowChat') setLowChatVisible(true);
+      else if (toolId === 'safeWalk') setSafeWalkVisible(true);
+      else if (toolId === 'widget') setWidgetModalVisible(true);
+      else if (toolId === 'shakeModal') setShakeModalVisible(true);
+      else if (toolId === 'duress') setActiveSubScreen('duressPIN');
+      else if (toolId === 'voice') setVoiceModalVisible(true);
+      else if (toolId === 'stress') setActiveSubScreen('voiceStress');
+      else if (toolId === 'pushNotif') setPushNotifVisible(true);
+      else if (toolId === 'routing') setIsRoutingActive(true);
+      else if (toolId === 'afterAlert') setIsAfterAlertActive(true);
+      else if (toolId === 'familyAlert') setActiveSubScreen('trustedFamilyAlert');
+      else if (toolId === 'offline') setActiveSubScreen('offlineMode');
+      else if (toolId === 'shakeSettings') setActiveSubScreen('shakeSettings');
+    }, 120);
   };
 
   return (
@@ -297,6 +299,7 @@ export const AppNavigator: React.FC = () => {
             onOpenToolsModal={() => setQuickToolsVisible(true)}
             onOpenSurvivalGuides={() => setSurvivalGuidesVisible(true)}
             onOpenAIAssistant={() => setAiAssistantVisible(true)}
+            onOpenLostChild={() => setLostChildVisible(true)}
           />
         </NavigationContainer>
       )}

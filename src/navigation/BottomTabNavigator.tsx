@@ -33,6 +33,7 @@ interface BottomTabNavigatorProps {
   onOpenToolsModal: () => void;
   onOpenSurvivalGuides?: () => void;
   onOpenAIAssistant?: () => void;
+  onOpenLostChild?: () => void;
 }
 
 export const BottomTabNavigator: React.FC<BottomTabNavigatorProps> = ({
@@ -44,6 +45,7 @@ export const BottomTabNavigator: React.FC<BottomTabNavigatorProps> = ({
   onOpenToolsModal,
   onOpenSurvivalGuides,
   onOpenAIAssistant,
+  onOpenLostChild,
 }) => {
   return (
     <Tab.Navigator
@@ -87,6 +89,7 @@ export const BottomTabNavigator: React.FC<BottomTabNavigatorProps> = ({
             onOpenMap={() => navigation.navigate('Map')}
             onOpenToolsModal={onOpenToolsModal}
             onOpenAIAssistant={onOpenAIAssistant}
+            onOpenLostChild={onOpenLostChild}
           />
         )}
       </Tab.Screen>

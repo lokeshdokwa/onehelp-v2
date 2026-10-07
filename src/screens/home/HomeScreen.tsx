@@ -37,6 +37,7 @@ interface HomeScreenProps {
   onOpenService?: (service: 'police' | 'fire' | 'ambulance' | 'disaster') => void;
   onOpenToolsModal?: () => void;
   onOpenAIAssistant?: () => void;
+  onOpenLostChild?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -47,6 +48,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenService,
   onOpenToolsModal,
   onOpenAIAssistant,
+  onOpenLostChild,
 }) => {
   const { status } = useSOSStore();
   const location = useLocationStore((s) => s.location);
@@ -307,6 +309,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </View>
             </View>
             <ChevronRightIcon size={18} color="#2563EB" />
+          </TouchableOpacity>
+        )}
+
+        {/* SIH Feature #26: Lost Child AI Face Matcher Button */}
+        {onOpenLostChild && (
+          <TouchableOpacity
+            style={[styles.aiAssistantCard, { marginTop: 10, borderColor: '#FEE2E2', backgroundColor: '#FFF5F5' }]}
+            onPress={onOpenLostChild}
+            activeOpacity={0.8}
+          >
+            <View style={styles.aiCardLeft}>
+              <View style={[styles.aiIconBubble, { backgroundColor: '#FEE2E2' }]}>
+                <Text style={styles.aiIconEmoji}>👦</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.aiTitleRow}>
+                  <Text style={[styles.aiCardTitle, { color: '#991B1B' }]}>Lost Child AI Face Matcher</Text>
+                  <View style={[styles.aiOfflinePill, { backgroundColor: '#DC2626' }]}>
+                    <Text style={styles.aiOfflinePillText}>100% OFFLINE</Text>
+                  </View>
+                </View>
+                <Text style={[styles.aiCardSubtitle, { color: '#7F1D1D' }]} numberOfLines={1}>
+                  On-device biometric match • Rajasthan Police DB
+                </Text>
+              </View>
+            </View>
+            <ChevronRightIcon size={18} color="#DC2626" />
           </TouchableOpacity>
         )}
 
